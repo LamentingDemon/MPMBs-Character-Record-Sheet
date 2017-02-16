@@ -15,11 +15,16 @@ ClassSubList["favoredsoul"] = {
 	
 	subname : "Favored Soul",
 	
-	source : ["UA:S", 1],
-		
-	fullname : "Favored Soul", //if no fullname is defined it will be automatically generated as "Class Name (Subclass name)". In this example that would be: "MyClass (Path of SpecialMe)"
-	spellcastingList : { class : ["sorcerer", "cleric"] },
+	source : ["UA:S", 1], 
 	
+	fullname : "Favored Soul",
+	spellcastingList : { class : ["sorcerer", "cleric"] },
+  spellcastingFactor : 1,
+  spellcastingKnown : {
+  cantrips : [4, 4, 4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+  spells : [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 12, 13, 13, 14, 14, 15, 15, 15, 15],
+},
+  
 	features : {
 	
 		"subclassfeature1" : {
@@ -50,6 +55,26 @@ ClassSubList["favoredsoul"] = {
 			minlevel : 6,
 			description : "\n   " + "Choose an otherworldly quality using the \"ChooseFeature\" button above" + "\n   " + "If my proficiency bonus applies to a Charisma check, I double that bonus.",
       choices : ["Beautiful", "Youthful", "Kind", "Imposing"],
+      "beautiful" : {
+            name : "Beautiful",
+            source : ["UA:S", 1],
+            description : "My appearance takes on an otherworldly quality of beauty"
+      },
+      "youthful" : {
+            name : "Youthful",
+            source : ["UA:S", 1],
+            description : "My appearance takes on an otherworldly quality of youthfulness"
+      },
+      "kind" : {
+            name : "Kind",
+            source : ["UA:S", 1],
+            description : "My appearance takes on an otherworldly quality of kindness"
+      },
+      "imposing" : {
+            name : "Imposing",
+            source : ["UA:S", 1],
+            description : "My appearance takes on an otherworldly quality of imposingness"
+      }, 
 		},
     "subclassfeature14" : {
       name : "Divine Purity",
