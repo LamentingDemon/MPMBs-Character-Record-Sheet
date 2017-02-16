@@ -4,9 +4,9 @@ SourceList["UA:S"] = {
 	
 	abbreviation : "UA:S",
 	
-	group : "Unearthed Arcana"
+	group : "Unearthed Arcana",
 	
-	url : "http://media.wizards.com/2017/dnd/downloads/26_UASorcererUA020617s.pdf"
+	url : "http://media.wizards.com/2017/dnd/downloads/26_UASorcererUA020617s.pdf",
 };
 
 ClassSubList["favoredsoul"] = {
@@ -55,7 +55,7 @@ ClassSubList["favoredsoul"] = {
       name : "Divine Purity",
       source: ["UA:S", 1],
       minlevel : 14,
-      description: "\n   " + "I am immune to disease, poison damage, and the poisoned condition."
+      description: "\n   " + "I am immune to disease, poison damage, and the poisoned condition.",
       save : "Immune to disease, poison damage, and the poisoned condition",
     },
     "subclassfeature18" : {
