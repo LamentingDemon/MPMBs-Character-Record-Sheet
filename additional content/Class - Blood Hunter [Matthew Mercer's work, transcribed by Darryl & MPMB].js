@@ -18,7 +18,7 @@
 				
 	Code by:	Darryl Cook & MorePurpleMoreBetter
 				Order of the Lycan code by MorePurpleMoreBetter
-	Date:		2017-02-15 (sheet v12.83)
+	Date:		2017-09-22 (sheet v12.998)
 
 	Please support the creator of this content (Matthew Mercer) and download his material from the DMs Guild website: http://www.dmsguild.com/browse.php?x=0&y=0&author=Matthew%20Mercer
 	
@@ -35,6 +35,10 @@ ClassList["blood hunter"] = {
 	improvements : [0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5],
 	saves : ["Str", "Wis"],
 	skills : ["\n\n" + toUni("Blood Hunter") + ": Choose two from Acrobatics, Arcane, Athletics, Insight, Investigation, and Survival."],
+	toolProfs : {
+		primary : ["Alchemist's supplies"],
+		secondary : ["Alchemist's supplies"]
+	},
 	tools : ["Alchemist's supplies", "Alchemist's supplies"],
 	armor : [
 		[true, true, false, false],
@@ -52,7 +56,7 @@ ClassList["blood hunter"] = {
 			name : "Hunter's Bane",
 			source : ["MM:BH", 3],
 			minlevel : 1,
-			description : "\n   " + "When tracking a Fey, Fiends, or Undead, I can't be surprised by a creature of that type" + "\n   " + "I have adv. on Wis (Survival) checks to track and Int checks to recall info about them" + "\n   " + "From 11th level, I can take rite damage for adv. on Wis (Insight) or Cha (Intimidation)",
+			description : "\n   " + "When tracking a Fey, Fiends, or Undead, I can't be surprised by a creature of that type" + "\n   " + "I have adv. on Wis (Survival) checks to track and Int checks to recall info about them" + "\n   " + "From 11th level, I can take rite damage for adv. on Wis (Insight) or Cha (Intimidation)"
 		},
 		"crimson rite" : {
 			name : "Crimson Rite",
@@ -81,17 +85,20 @@ ClassList["blood hunter"] = {
 			"roar (esoteric rite)" : {
 				source : ["MM:BH", 3],
 				name : "Rite of the Roar",
-				description : "\n   " + "I can select thunder as the damage type for my crimson rite damage die"
+				description : "\n   " + "I can select thunder as the damage type for my crimson rite damage die",
+				prereqeval : "classes.known['blood hunter'].level >= 14"
 			},
 			"oracle (esoteric rite)" : {
 				source : ["MM:BH", 3],
 				name : "Rite of the Oracle",
-				description : "\n   " + "I can select psychic as the damage type for my crimson rite damage die"
+				description : "\n   " + "I can select psychic as the damage type for my crimson rite damage die",
+				prereqeval : "classes.known['blood hunter'].level >= 14"
 			},
 			"dead (esoteric rite)" : {
 				source : ["MM:BH", 3],
 				name : "Rite of the Dead",
-				description : "\n   " + "I can select necrotic as the damage type for my crimson rite damage die"
+				description : "\n   " + "I can select necrotic as the damage type for my crimson rite damage die",
+				prereqeval : "classes.known['blood hunter'].level >= 14"
 			},
 		},
 		"fighting style" : {
@@ -104,21 +111,21 @@ ClassList["blood hunter"] = {
 				name : "Archery Fighting Style",
 				description : "\n   " + "+2 bonus to attack rolls I make with ranged weapons",
 				calcChanges : {
-					atkCalc : ["if (!fields.Range.match(/melee/i) && !WeaponText.match(/spell|cantrip/i) && (!theWea || !theWea.type.match(/cantrip|spell/i))) {output.extraHit += 2; }; ", "My ranged weapons get a +2 bonus on the To Hit."]
+					atkCalc : ["if (isRangedWeapon) {output.extraHit += 2; }; ", "My ranged weapons get a +2 bonus on the To Hit."]
 				}
 			},
 			"dueling" : {
 				name : "Dueling Fighting Style",
 				description : "\n   " + "+2 to damage rolls when wielding a melee weapon in one hand and no other weapon",
 				calcChanges : {
-					atkCalc : ["var areOffHands = function(n){for(var i=1;i<=n;i++){if (What('Bonus Action ' + i).match(/off.hand.attack/i)) {return true; }; }; }(FieldNumbers.actions); if (!areOffHands && fields.Range.match(/melee/i) && !theWea.description.match(/\\b(2|two).?hand(ed)?s?\\b/i)) {output.extraDmg += 2; }; ", "When I'm wielding a melee weapon in one hand and no weapon in my other hand, I do +2 damage with that melee weapon. This condition will always be false if the bonus action 'Off-hand Attack' exists."]
+					atkCalc : ["var areOffHands = function(n){for(var i=1;i<=n;i++){if ((/off.hand.attack/i).test(What('Bonus Action ' + i))) {return true; }; }; }(FieldNumbers.actions); if (!areOffHands && isMeleeWeapon && !(/\\b(2|two).?hand(ed)?s?\\b/i).test(theWea.description)) {output.extraDmg += 2; }; ", "When I'm wielding a melee weapon in one hand and no weapon in my other hand, I do +2 damage with that melee weapon. This condition will always be false if the bonus action 'Off-hand Attack' exists."]
 				}
 			},
 			"great weapon fighting" : {
 				name : "Great Weapon Fighting Style",
 				description : " [not with Crimson Rite die]" + "\n   " + "Reroll 1 or 2 on damage if wielding two-handed/versatile melee weapon in both hands",
 				calcChanges : {
-					atkAdd : ["if (fields.Range.match(/melee/i) && fields.Description.match(/\\b(versatile|(2|two).?hand(ed)?s?)\\b/i)) {fields.Description += '; Re-roll 1 or 2 on damage die' + (fields.Description.match(/versatile/i) ? ' when two-handed' : ''); }; ", "While wielding a two-handed or versatile melee weapon in two hands, I can re-roll a 1 or 2 on any damage die once."]
+					atkAdd : ["if (isMeleeWeapon && (/\\b(versatile|(2|two).?hand(ed)?s?)\\b/i).test(theWea.description)) {fields.Description += (fields.Description ? '; ' : '') + 'Re-roll 1 or 2 on damage die' + ((/versatile/i).test(fields.Description) ? ' when two-handed' : ''); }; ", "While wielding a two-handed or versatile melee weapon in two hands, I can re-roll a 1 or 2 on any damage die once."]
 				}
 			},
 			"two-weapon fighting" : {
@@ -211,7 +218,10 @@ ClassList["blood hunter"] = {
 			source : ["MM:BH", 4],
 			minlevel : 14,
 			description : "\n   " + "I am immune to being frightened, and have adv. on saves against magical charm effects",
-			save : "Immune to being frightened; Adv. vs. magical charm effects"
+			savetxt : {
+				immune : ["frightened"],
+				adv_vs : ["charmed"]
+			}
 		},
 		"sanguine mastery" : {
 			name : "Sanguine Mastery",
@@ -263,8 +273,7 @@ ClassSubList["order of the ghostslayer"] = {
 			source : ["MM:BH", 5],
 			minlevel : 15,
 			description : "\n   " + "Out to 30 feet, I can see in normal darkness as well as invisible creatures and objects",
-			eval : "AddString(\"Vision\",\"Darkvision 30 ft; See invisible 30 ft\", \"; \");",
-			removeeval : "RemoveString(\"Vision\", \"Darkvision 30 ft; See invisible 30 ft\");"
+			vision : [["Darkvision", 30], ["See invisible", 30]]
 		},
 		"subclassfeature18" : {
 			name : "Vengeful Spirit",
@@ -403,7 +412,7 @@ ClassSubList["order of the profane soul"] = {
 					oncelr : true,
 				},
 			},
-			eval : "if (FeaChoice === \"\") {var CFrem = What(\"Class Features Remember\"); var tReg = /.*?blood hunter,subclassfeature3,(the (archfey|fiend|great old one|undying)).*/i; if (CFrem.match(tReg)) {FeaChoice = CFrem.replace(tReg, \"$1\"); AddString(\"Class Features Remember\", \"blood hunter,subclassfeature7.1,\" + FeaChoice, false);};};",
+			eval : "if (FeaChoice === \"\") {var CFrem = What(\"Class Features Remember\"); var tReg = /.*?blood hunter,subclassfeature3,(the (archfey|fiend|great old one|undying)).*/i; if ((tReg).test(CFrem)) {FeaChoice = CFrem.replace(tReg, \"$1\"); AddString(\"Class Features Remember\", \"blood hunter,subclassfeature7.1,\" + FeaChoice, false);};};",
 		},
 		"subclassfeature11" : {
 			name : "Diabolic Channel",
@@ -465,7 +474,7 @@ ClassSubList["order of the profane soul"] = {
 					oncelr : true,
 				},
 			},
-			eval : "if (FeaChoice === \"\") {var CFrem = What(\"Class Features Remember\"); var tReg = /.*?blood hunter,subclassfeature3,(the (archfey|fiend|great old one|undying)).*/i; if (CFrem.match(tReg)) {FeaChoice = CFrem.replace(tReg, \"$1\"); AddString(\"Class Features Remember\", \"blood hunter,subclassfeature15,\" + FeaChoice, false);};};",
+			eval : "if (FeaChoice === \"\") {var CFrem = What(\"Class Features Remember\"); var tReg = /.*?blood hunter,subclassfeature3,(the (archfey|fiend|great old one|undying)).*/i; if ((tReg).test(CFrem)) {FeaChoice = CFrem.replace(tReg, \"$1\"); AddString(\"Class Features Remember\", \"blood hunter,subclassfeature15,\" + FeaChoice, false);};};",
 		},
 		"subclassfeature18" : {
 			name : "Soul Syphon",
@@ -493,37 +502,41 @@ ClassSubList["order of the mutant"] = {
 				name : "Aether",
 				source : ["MM:BH", 7],
 				description : "\n   " + "I gain 20 ft flying speed" + "\n    - " + "Side effect: I have disadvantage on Strength and Dexterity ability checks",
+				prereqeval : "classes.known['blood hunter'].level >= 11",
+				speed : { fly : { spd : 20, enc : 10 } }
 			},
 			"celerity" : {
 				name : "Celerity",
 				source : ["MM:BH", 7],
-				description : "\n   " + "My Dexterity score increases by an amount equal to my mutation score" + "\n    - " + "Side effect: My Wisdom score decreases by an amount equal to my mutation score",
+				description : "\n   " + "My Dexterity score increases by an amount equal to my mutation score" + "\n    - " + "Side effect: My Wisdom score decreases by an amount equal to my mutation score"
 			},
 			"conversant" : {
 				name : "Conversant",
 				source : ["MM:BH", 7],
-				description : "\n   " + "I gain advantage on Intelligence ability checks" + "\n    - " + "Side effect: I have disadvantage on Charisma ability checks",
+				description : "\n   " + "I gain advantage on Intelligence ability checks" + "\n    - " + "Side effect: I have disadvantage on Charisma ability checks"
 			},
 			"cruelty (prereq: level 11 blood hunter)" : {
 				name : "Cruelty",
 				source : ["MM:BH", 7],
 				description : "\n   " + "I can make a single weapon attack as a bonus action" + "\n    - " + "Side effect: I have disadvantage on all saving throws",
-				action : ["bonus action", ""]
+				action : ["bonus action", ""],
+				prereqeval : "classes.known['blood hunter'].level >= 11"
 			},
 			"impermeable" : {
 				name : "Impermeable",
 				source : ["MM:BH", 7],
-				description : "\n   " + "I gain resistance to piercing damage" + "\n    - " + "Side effect: I gain vulnerability to slashing damage",
+				description : "\n   " + "I gain resistance to piercing damage" + "\n    - " + "Side effect: I gain vulnerability to slashing damage"
 			},
 			"mobility" : {
 				name : "mobility",
 				source : ["MM:BH", 7],
-				description : "\n   " + "I gain immunity to the grappled and restrained conditions; At 11th level also paralyzed" + "\n    - " + "Side effect: I gain a penalty to initiative rolls equal to 2 times my mutation score",
+				description : "\n   " + "I gain immunity to the grappled and restrained conditions; At 11th level also paralyzed" + "\n    - " + "Side effect: I gain a penalty to initiative rolls equal to 2 times my mutation score"
 			},
 			"nighteye" : {
 				name : "Nighteye",
 				source : ["MM:BH", 7],
 				description : "\n   " + "I gain darkvision up to 60 ft, or add an extra 60 ft to it if I already have darkvision" + "\n    - " + "Side effect: I gain sunlight sensitivity",
+				vision : [["Darkvision", "+60"], ["Sunlight Sensitivity", 0]],
 			},
 			"potency" : {
 				name : "Potency",
@@ -534,16 +547,19 @@ ClassSubList["order of the mutant"] = {
 				name : "Precision",
 				source : ["MM:BH", 7],
 				description : "\n   " + "My weapon attacks score critical hits on attack rolls of 19 and 20" + "\n    - " + "Side effect: All healing that I recieve is halved",
+				prereqeval : "classes.known['blood hunter'].level >= 11"
 			},
 			"rapidity" : {
 				name : "Rapidity",
 				source : ["MM:BH", 8],
-				description : "\n   " + "My speed increases with 10 ft (15 ft at 15th level)" + "\n    - " + "Side effect: I have disadvantage on Dexterity ability checks.",
+				description : "\n   " + "My speed increases with 10 ft (15 ft at 15th level)" + "\n    - " + "Side effect: I have disadvantage on Dexterity ability checks."
 			},
 			"reconstruction (prereq: level 7 blood hunter)" : {
 				name : "Reconstruction",
 				source : ["MM:BH", 8],
 				description : "\n   " + "At the start of my turn in combat when I'm conscious and above 0 HP, I regenerate HP" + "\n   " + "The amount of HP I regenerate is equal to 2 times my mutagen score" + "\n    - " + "Side effect: My speed decreases by 10 ft",
+				prereqeval : "classes.known['blood hunter'].level >= 7",
+				speed : { allModes : "-10" }
 			},
 			"sagacity" : {
 				name : "Sagacity",
@@ -553,17 +569,17 @@ ClassSubList["order of the mutant"] = {
 			"shielded" : {
 				name : "Shielded",
 				source : ["MM:BH", 8],
-				description : "\n   " + "I gain resistance to slashing damage" + "\n    - " + "Side effect: I gain vulnerability to bludgeoning damage",
+				description : "\n   " + "I gain resistance to slashing damage" + "\n    - " + "Side effect: I gain vulnerability to bludgeoning damage"
 			},
 			"unbreakable" : {
 				name : "Unbreakable",
 				source : ["MM:BH", 8],
-				description : "\n   " + "I gain resistance to bludgeoning damage" + "\n    - " + "Side effect: I gain vulnerability to piercing damage",
+				description : "\n   " + "I gain resistance to bludgeoning damage" + "\n    - " + "Side effect: I gain vulnerability to piercing damage"
 			},
 			"wariness" : {
 				name : "Wariness",
 				source : ["MM:BH", 8],
-				description : "\n   " + "I gain a bonus to my initiative rolls equal to 2 times my mutation score" + "\n    - " + "Side effect: I gain disadvantage on Wisdom (Perception) checks",
+				description : "\n   " + "I gain a bonus to my initiative rolls equal to 2 times my mutation score" + "\n    - " + "Side effect: I gain disadvantage on Wisdom (Perception) checks"
 			},
 		},
 		"subclassfeature3.1" : {
@@ -590,7 +606,7 @@ ClassSubList["order of the mutant"] = {
 			source : ["MM:BH", 7],
 			minlevel : 15,
 			description : "\n   " + "I gain immunity to poison damage and the poison condition",
-			save : "Immune to poison damage and the poison condition"
+			savetxt : { immune : ["poison"] }
 		},
 		"subclassfeature18" : {
 			name : "Exalted Mutation",
@@ -623,8 +639,7 @@ ClassSubList["order of the lycan"] = {
 			source : ["MM:OotL", 2],
 			minlevel : 3,
 			description : "\n   " + "I gain advantage on Wisdom (Perception) checks that rely on hearing or smell",
-			eval : "AddString(\"Vision\",\"Adv. on Wis (Perception) checks that rely on hearing or smell\", \"; \");",
-			removeeval : "RemoveString(\"Vision\", \"Adv. on Wis (Perception) checks that rely on hearing or smell\");"
+			vision : [["Adv. on Perception relying on hearing or smell", 0]]
 		},
 		"subclassfeature3.1" : {
 			name : "Hybrid Transformation",
@@ -634,9 +649,10 @@ ClassSubList["order of the lycan"] = {
 			usages : ["", "", 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3],
 			recovery : "short rest",
 			action : ["action", " (start/end)"],
-			save : "Adv. on Str saves while in Hybrid form",
-			eval : "AddWeapon(\"Predatory Strike\"); AddResistance(\"Bludgeon. (in hybrid)\", \"Order of the Lycan (Hybrid Transformation)\"); AddResistance(\"Piercing (in hybrid)\", \"Order of the Lycan (Hybrid Transformation)\"); AddResistance(\"Slashing (in hybrid)\", \"Order of the Lycan (Hybrid Transformation)\"); AddAction(\"bonus action\", \"Predatory Strike (with Attack action)\", \"Order of the Lycan (Hybrid Transformation)\");",
-			removeeval : "RemoveWeapon(\"Predatory Strike\"); RemoveResistance(\"Bludgeon. (in hybrid)\"); RemoveResistance(\"Piercing (in hybrid)\"); RemoveResistance(\"Slashing (in hybrid)\"); RemoveAction(\"bonus action\", \"Predatory Strike (with Attack action)\");",
+			savetxt : { text : ["Adv. on Str saves in Hybrid form"] },
+			dmgres : [["Bludgeoning", "Bludg. (in hybrid)"], ["Piercing", "Pierc. (in hybrid)"], ["Slashing", "Slash. (in hybrid)"]],
+			eval : "AddWeapon(\"Predatory Strike\"); AddAction(\"bonus action\", \"Predatory Strike (with Attack action)\", \"Order of the Lycan (Hybrid Transformation)\");",
+			removeeval : "RemoveWeapon(\"Predatory Strike\"); RemoveAction(\"bonus action\", \"Predatory Strike (with Attack action)\");",
 			changeeval : "UpdateHybridForm();"
 		},
 		"subclassfeature7" : {
@@ -644,8 +660,7 @@ ClassSubList["order of the lycan"] = {
 			source : ["MM:OotL", 2],
 			minlevel : 7,
 			description : "\n   " + "My speed increases with 10 ft" + "\n   " + "I also add 10 ft to my long jump distance and 3 ft to my high jump distance" + "\n   " + "In my Hybrid form, I gain the Improved Predatory Strikes feature",
-			eval : "ChangeSpeed(10);",
-			removeeval : "ChangeSpeed(-10);"
+			speed : { allModes : "+10" }
 		},
 		"subclassfeature11" : {
 			name : "Advanced Transformation",
@@ -704,6 +719,9 @@ WeaponsList["predatory strike"] = {
 
 //a function to update the notes page with the Hybrid form
 UpdateHybridForm = function() {
+	var NotesPrefix = isTemplVis("ASnotes", true);
+	if (!NotesPrefix) return;
+	
 	var BHlevelOld = classes.old["blood hunter"] ? classes.old["blood hunter"].classlevel : 0;
 	var BHlevelNew = classes.known["blood hunter"] ? classes.known["blood hunter"].level : 0;
 	if (BHlevelOld <= 2 && BHlevelNew <= 2) return;
@@ -730,7 +748,7 @@ UpdateHybridForm = function() {
 	//update the hybrid feature on the notes page
 	var BHstringOld = makeHybridText(BHlevelOld);
 	var BHstringNew = makeHybridText(BHlevelNew);
-	ReplaceString("Notes.Left", BHstringNew, false, BHstringOld);
+	ReplaceString(NotesPrefix[1] + "Notes.Left", BHstringNew, false, BHstringOld);
 	
 	//update the predatory strikes
 	var PSdie = BHlevelNew >= 18 ? 10 : (BHlevelNew >= 11 ? 8 : 6);
@@ -741,7 +759,7 @@ UpdateHybridForm = function() {
 	if (BHlevelNew >= 3) {
 		for (var PSi = 0; PSi < CurrentWeapons.known.length; PSi++) {
 			if (CurrentWeapons.known[PSi][0] === "predatory strike") {
-				Value("BlueText.Attack." + (PSi + 1) + ".Damage Die", PSdie);
+				Value("BlueText.Attack." + (PSi + 1) + ".Damage Die", "d" + PSdie);
 				Value("BlueText.Attack." + (PSi + 1) + ".Damage Bonus", PSdmg);
 				Value("BlueText.Attack." + (PSi + 1) + ".To Hit Bonus", PShit);
 			}

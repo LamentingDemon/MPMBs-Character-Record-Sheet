@@ -128,13 +128,12 @@ function SelectElement_Dialog(theNodes) {
 		}
 	}
 	var theElem = countNodes[0] === 1 ? countNodes[1] : false;
+	var theTxt = "This pop-up is necessary because Adobe Acrobat can only detect if you selected an element, and not if you selected a node (i.e. an element you can collapse/expand).\nPlease select which node you want to move from the options below, or press cancel if you don't want anything to move.";
 	var dialogue = {
 		selection : false,
-		input : theNodes,
 		initialize : function (dialog) {
 			dialog.load({
-				"sele" : this.input,
-				"txt0" : "This pop-up is necessary because Adobe Acrobat can only detect if you selected an element, and not if you selected a node (i.e. an element you can collapse/expand).\nPlease select which node you want to move from the options below, or press cancel if you don't want anything to move."
+				"sele" : theNodes
 			});
 		},
 		commit : function (dialog) {
@@ -151,14 +150,15 @@ function SelectElement_Dialog(theNodes) {
 					item_id : "head",
 					font : "heading",
 					bold : true,
-					height : 21,
+					wrap_name : true,
 					width : 400,
 					name : "Select a node to use (because Adobe Acrobat is stupid)"
 				}, {
 					type : "static_text",
 					item_id : "txt0",
-					char_height : 8,
-					width : 400
+					wrap_name : true,
+					width : 400,
+					name : theTxt
 				}, {
 					type : "hier_list_box",
 					item_id : "sele",
@@ -193,8 +193,8 @@ function ObjectToArray(obj, type, testObj) {
 	for (var p in obj) {
 		if (obj[p].constructor == Object) {
 			theArr.push.apply(theArr, ObjectToArray(obj[p], type, testObj));
-			if (type.match(/nodes|all/i) && testArr.indexOf(p) === -1) theArr.push(p);
-		} else if (type.match(/elements|all/i) && testArr.indexOf(p.replace(/^ basic /, "")) === -1) {
+			if ((/nodes|all/i).test(type) && testArr.indexOf(p) === -1) theArr.push(p);
+		} else if ((/elements|all/i).test(type) && testArr.indexOf(p.replace(/^ basic /, "")) === -1) {
 			theArr.push(p);
 		}
 	}
@@ -203,38 +203,57 @@ function ObjectToArray(obj, type, testObj) {
 
 //a function that sets the global variable of excluded materials
 //inclA must be the same length as inclA_Names, and exclA must be the same length as exclA_Names
-function resourceDecisionDialog() {
+function resourceDecisionDialog(atOpening, atReset) {
+	if (!atOpening && app.viewerVersion < 15) FunctionIsNotAvailable();
 	var isFirstTime = CurrentSources.firstTime;
-	if (this.info.SpellsOnly) { //if this is a spell sheet, only use sources that have spells associated with them
+	if (this.info.SpellsOnly) { //if this is a spell sheet, only use sources that have spells or spellcasting classes associated with them
 		var spellSources = [];
 		for (var u in SpellsList) {
-			var sSource = SpellsList[u].source;
-			aSource = isArray(sSource) ? sSource[0] : sSource;
-			if (aSource && spellSources.indexOf(aSource) === -1) spellSources.push(aSource);
-		}
-	}
+			var sSource = parseSource(SpellsList[u].source);
+			if (!sSource) continue;
+			for (var i = 0; i < sSource.length; i++) {
+				if (spellSources.indexOf(sSource[i][0]) === -1) spellSources.push(sSource[i][0]);
+			};
+		};
+		for (var aClass in ClassList) {
+			var sSource = parseSource(ClassList[aClass].source);
+			if (!sSource || !ClassList[aClass].spellcastingFactor || aClass === "rangerua") continue;
+			for (var i = 0; i < sSource.length; i++) {
+				if (spellSources.indexOf(sSource[i][0]) === -1) spellSources.push(sSource[i][0]);
+			};
+		};
+	};
 	
 	var exclObj = {}, inclObj = {};
 	if (isFirstTime) {
 		CurrentSources = {
-			firstTime : false,
-			globalExcl : []
+			firstTime : atReset ? true : false,
+			globalExcl : [],
+			ammoExcl : [],
+			weapExcl : []
 		};
 		for (var src in SourceList) {
 			if (this.info.SpellsOnly && spellSources.indexOf(src) === -1) continue;
-			if (SourceList[src].group === "Unearthed Arcana") {
-				CurrentSources.globalExcl.push(src);
-			}
+			if (SourceList[src].group === "Unearthed Arcana") CurrentSources.globalExcl.push(src);
+		};
+		for (var amm in AmmoList) {
+			if (AmmoList[amm].source && AmmoList[amm].source.toSource().indexOf("D") !== -1) CurrentSources.ammoExcl.push(amm);
+		};
+		for (var wea in WeaponsList) {
+			if (WeaponsList[wea].list === "firearm" && WeaponsList[wea].source && WeaponsList[wea].source.toSource().indexOf("D") !== -1) CurrentSources.weapExcl.push(wea);
 		};
 		Value("CurrentSources.Stringified", CurrentSources.toSource());
 	};
+	if (atOpening && (atReset || app.viewerVersion < 15)) return;
+	
 	var remCS = CurrentSources.toSource();
 	
 	for (var src in SourceList) {
 		if (this.info.SpellsOnly && spellSources.indexOf(src) === -1) continue;
-		var srcGroup = SourceList[src].group;
+		var srcGroup = !SourceList[src].group ? "other" : SourceList[src].group;
 		var srcName = SourceList[src].name.replace(RegExp(srcGroup + " ?:? ?", "i"), "") + " (" + SourceList[src].abbreviation + ")";
 		if (!srcGroup || srcGroup === "default") continue;
+		if (srcGroup !== "Primary Sources") srcGroup = "\u200B" + srcGroup;
 		if (!exclObj[srcGroup]) exclObj[srcGroup] = {};
 		if (!inclObj[srcGroup]) inclObj[srcGroup] = {};
 		if (CurrentSources.globalExcl.indexOf(src) !== -1) {
@@ -252,12 +271,17 @@ function resourceDecisionDialog() {
 		try {
 			var mons = app.monitors.primary();
 			var resHigh = mons && mons[0] && mons[0].rect ? mons[0].rect[3] : false;
-			if (resHigh && resHigh < 800) selBoxHeight = 250 - Math.min(100, 850 - resHigh);
+			if (resHigh && resHigh < 800) selBoxHeight = 250 - Math.min(100, 825 - resHigh);
 			tries = 100;
 		} catch (e) {
 			tries += 1;
 		}
 	} while (tries < 5);
+	
+	
+	var Text0 = (isFirstTime ? "As this is the first time you are opening the sheet, please select which resources it is allowed to use. It is highly recommended that you set the resources you want to use before inputting anything into the sheet. However, you can open this dialogue at any time using the \"Sources\" button (with the book icon), or the \"Source Material\" bookmark, and change it.\n" : "") + "You can include or exclude entire sourcebooks (top) and exclude just elements of the sourcebooks set to be included (buttons below).\nNote that you can also add more resources using the \"Add Custom Script\" bookmark.\nIf multiple things with the same name are included, like the Ranger from the PHB and the Ranger from UA:RR, the newest source will be used.\nYou can always use ENTER to confirm or ESC to cancel this dialogue.";
+	var Text1 = "By pressing one of the buttons below, you open another dialogue where you can exclude and include parts of the sourcebooks. This way you can make a selection of things that the sheet is and isn't allowed to use for each category, without having to exclude a sourcebook in its entirety. Note that if you excluded a sourcebook above, its content will not show up in the dialogue created when you press the buttons below, as all of its content will be ignored by the sheet's automation.";
+	var Text2 = toUni("Warning:") + " If you change anything that affects any drop-down boxes on the sheet, those will be updated. " + (isFirstTime ? "If a lot of drop-down boxes are affected, this can take several minutes." : "Please be aware, that if those drop-down boxes contained any value, they will first be reset and then re-applied using the resources selected above. This can take several minutes.");
 	
 	var selectionDialogue = {
 		exclActive : true,
@@ -267,13 +291,12 @@ function resourceDecisionDialog() {
 		sourceLink : "",
 		initialize : function (dialog) {
 			dialog.load({
+				"img1" : allIcons.sources,
 				"ExcL" : this.exclObject,
 				"IncL" : this.inclObject,
-				"txt0" : (isFirstTime ? "As this is the first time you are opening the sheet, please select which resources it is allowed to use. It is highly recommended that you set the resources you want to use before inputting anything into the sheet. However, you can open this dialogue at any time using the \"Sources\" button (with the book icon) and change it.\n" : "") + "First you can set the sourcebooks the sheet is allowed to use for its automation.\nBelow that, you can open dialogues to include or exclude different parts of the sourcebooks set to be included.\nNote that you can always add more resources using the \"Add Custom Script\" bookmark.\nYou can always use ENTER to confirm or ESC to cancel this dialogue.",
-				"txt1" : "By pressing one of the buttons below, you open another dialogue where you can exclude and include parts of the sourcebooks. This way you can make a selection of things that the sheet is and isn't allowed to use for each category, without having to exclude a sourcebook in its entirety. Note that if you excluded a sourcebook above, its content will not show up in the dialogue created when you press the buttons below, as all of its content will be ignored by the sheet's automation.",
-				"txt2" : toUni("Warning:") + " If you change anything that affects any drop-down boxes on the sheet, those will be updated." + (isFirstTime ? " If a lot of drop-down boxes are affected, this can take several minutes." : "\nPlease be aware, that this will reset those drop-down boxes to their default value. After that, the sheet will re-enter the values, which in turn will trigger the automation. This automation will then be run using the resources selected above. This can take several minutes."),
 				"bLin" : "This button links to the web page of the selected sourcebook"
 			});
+			dialog.setForeColorRed("txt2");
 		},
 		commit : function (dialog) {},
 		updateLink : function (dialog, ExcInc) {
@@ -283,7 +306,7 @@ function resourceDecisionDialog() {
 			//run through the sourcelist and get the name of the source
 			var theSrc = false;
 			for (var src in SourceList) {
-				if (sourceNm === (SourceList[src].name.replace(/unearthed arcana: /i, "") + " (" + SourceList[src].abbreviation + ")")) {
+				if (sourceNm === (SourceList[src].name.replace(RegExp(SourceList[src].group + " ?:? ?", "i"), "") + " (" + SourceList[src].abbreviation + ")")) {
 					theSrc = src;
 					break;
 				}
@@ -301,7 +324,7 @@ function resourceDecisionDialog() {
 			//set the CurrentSources variable
 			CurrentSources.globalExcl = [];
 			for (var src in SourceList) {
-				var srcName = SourceList[src].name.replace(/unearthed arcana: /i, "") + " (" + SourceList[src].abbreviation + ")";
+				var srcName = SourceList[src].name.replace(RegExp(SourceList[src].group + " ?:? ?", "i"), "") + " (" + SourceList[src].abbreviation + ")";
 				if (exclArr.indexOf(srcName) !== -1) CurrentSources.globalExcl.push(src);
 			};
 		},
@@ -385,46 +408,60 @@ function resourceDecisionDialog() {
 		bBac : function (dialog) {resourceSelectionDialog("background");},
 		bBaF : function (dialog) {resourceSelectionDialog("background feature");},
 		bCre : function (dialog) {resourceSelectionDialog("creature");},
+		bAtk : function (dialog) {resourceSelectionDialog("weapon");},
+		bArm : function (dialog) {resourceSelectionDialog("armor");},
+		bAmm : function (dialog) {resourceSelectionDialog("ammo");},
 		bLin : function (dialog) {if (this.sourceLink) app.launchURL(this.sourceLink, true)},
+		bSrc : function (dialog) { ShowDialog("List of Sources, sorted by abbreviation", "sources"); },
 		description : {
 			name : "Pick which resources are excluded and included",
 			elements : [{
 				type : "view",
 				align_children : "align_left",
 				elements : [{
-					type : "static_text",
-					item_id : "head",
-					alignment : "align_fill",
-					font : "title",
-					bold : true,
-					height : 21,
-					width : 720,
-					name : "Select which resources the sheet's automation should use"
+					type : "view",
+					align_children : "align_row",
+					elements : [{
+						type : "image",
+						item_id : "img1",
+						alignment : "align_bottom",
+						width : 20,
+						height : 20
+					}, {
+						type : "static_text",
+						item_id : "head",
+						alignment : "align_fill",
+						font : "title",
+						bold : true,
+						wrap_name : true,
+						width : 770,
+						name : "Select which resources the sheet's automation should use"
+					}]
 				}, {
 					type : "static_text",
 					item_id : "txt0",
-					char_height : isFirstTime ? 11 : 6,
-					width : 720,
+					wrap_name : true,
+					width : 800,
+					name : Text0
 				}, {
 					type : "cluster",
 					name : "The Sourcebooks",
 					font : "heading",
 					bold : true,
 					elements : [{
-						type : "static_text",
-						item_id : "txtf",
-						height : 21,
-						width : 710,
-						name : "Please select which sources you want to exclude or include in their entirety."
-					}, {
 						type : "view",
 						align_children : "align_row",
 						elements : [{
-							type : "cluster",
-							name : "Excluded from the automation",
-							font : "heading",
+							type : "view",
 							elements : [{
-								width : 250,
+								type : "static_text",
+								height : 21,
+								alignment : "align_center",
+								item_id : "Etxt",
+								name : "Excluded from the automation",
+								font : "heading"
+							}, {
+								width : 325,
 								height : selBoxHeight,
 								type : "hier_list_box",
 								item_id : "ExcL"
@@ -434,39 +471,54 @@ function resourceDecisionDialog() {
 							elements : [{
 								type : "button",
 								item_id : "BTRA",
-								name : ">>",
+								name : ">>"
 							}, {
 								type : "button",
 								item_id : "BTR1",
-								name : ">",
+								name : ">"
 							}, {
 								type : "button",
 								item_id : "BTL1",
-								name : "<",
+								name : "<"
 							}, {
 								type : "button",
 								item_id : "BTLA",
-								name : "<<",
+								name : "<<"
 							}]
 						}, {
-							type : "cluster",
-							name : "Included in the automation",
-							font : "heading",
+							type : "view",
 							elements : [{
-								width : 250,
+								type : "static_text",
+								height : 21,
+								alignment : "align_center",
+								item_id : "Itxt",
+								name : "Included in the automation",
+								font : "heading"
+							}, {
+								width : 325,
 								height : selBoxHeight,
 								type : "hier_list_box",
-								item_id : "IncL",
+								item_id : "IncL"
 							}]
 						}]
 					}, {
-						type : "button",
-						font : "dialog",
-						bold : true,
-						item_id : "bLin",
-						alignment : "align_center",
-						width : 700,
-						name : "This button links to the web page of the selected sourcebook"
+						type : "view",
+						align_children : "align_distribute",
+						alignment : "align_fill",
+						elements : [{
+							type : "button",
+							font : "dialog",
+							bold : true,
+							item_id : "bLin",
+							alignment : "align_left",
+							width : 575,
+							name : "This button links to the web page of the selected sourcebook"
+						}, {
+							type : "button",
+							item_id : "bSrc",
+							alignment : "align_right",
+							name : "List Source Abbreviations"
+						}]
 					}]
 				}, {
 					type : "cluster",
@@ -476,84 +528,107 @@ function resourceDecisionDialog() {
 					elements : [{
 						type : "static_text",
 						item_id : "txt1",
-						char_height : 7,
-						width : 710,
+						wrap_name : true,
+						width : 775,
+						name : Text1
 					}, {
 						type : "view",
 						align_children : "align_row",
 						alignment : "align_center",
-						elements : [{
+						elements : minVer ? [{
+							type : "button",
+							font : "dialog",
+							bold : true,
+							item_id : "bSpe",
+							name : "Spells/Psionics",
+							alignment : "align_center"
+						}] : [{
 							type : "button",
 							font : "dialog",
 							bold : true,
 							item_id : "bCla",
-							name : "Classes && Archetypes",
+							name : "Classes && Archetypes"
 						}, {
 							type : "button",
 							font : "dialog",
 							bold : true,
 							item_id : "bRac",
-							name : "Player Races",
+							name : "Player Races"
 						}, {
-							type : "button",
-							font : "dialog",
-							bold : true,
-							item_id : "bFea",
-							name : "Feats",
-						}, {
-							type : "button",
-							font : "dialog",
-							bold : true,
-							item_id : "bSpe",
-							name : "Spells",
-						}]
-					}, {
-						type : "view",
-						align_children : "align_row",
-						alignment : "align_center",
-						elements : [{
 							type : "button",
 							font : "dialog",
 							bold : true,
 							item_id : "bBac",
-							name : "Backgrounds",
+							name : "Backgrounds"
 						}, {
 							type : "button",
 							font : "dialog",
 							bold : true,
 							item_id : "bBaF",
-							name : "Background Features",
+							name : "Background Features"
+						}, {
+							type : "button",
+							font : "dialog",
+							bold : true,
+							item_id : "bFea",
+							name : "Feats"
+						}]
+					}, {
+						type : "view",
+						align_children : "align_row",
+						alignment : "align_center",
+						elements : minVer ? [] : [{
+							type : "button",
+							font : "dialog",
+							bold : true,
+							item_id : "bAtk",
+							name : "Weapons/Attacks"
+						}, {
+							type : "button",
+							font : "dialog",
+							bold : true,
+							item_id : "bArm",
+							name : "Armor"
+						}, {
+							type : "button",
+							font : "dialog",
+							bold : true,
+							item_id : "bAmm",
+							name : "Ammunition"
+						}, {
+							type : "button",
+							font : "dialog",
+							bold : true,
+							item_id : "bSpe",
+							name : "Spells/Psionics"
 						}, {
 							type : "button",
 							font : "dialog",
 							bold : true,
 							item_id : "bCre",
-							name : "Creatures",
+							name : "Creatures"
 						}]
 					}]
 				}, {
-					type : "static_text",
-					item_id : "txt2",
-					char_height : isFirstTime ? 3 : 5,
-					width : 720,
-				}, {
-					type : "ok_cancel",
-					ok_name : "Apply (can take a long time)",
+					type : "view", // the bottom row of buttons
+					align_children : "align_distribute",
+					alignment : "align_fill",
+					elements : [{
+						type : "static_text",
+						alignment : "align_left",
+						item_id : "txt2",
+						font : "palette",
+						wrap_name : true,
+						width : 500,
+						name : Text2
+					}, {
+						type : "ok_cancel",
+						alignment : "align_right",
+						ok_name : "Apply (can take a long time)"
+					}]
 				}]
 			}]
 		}
-	};
-	
-	if (minVer) {
-		selectionDialogue.description.elements[0].elements[3].elements[1] = {
-			type : "button",
-			font : "dialog",
-			bold : true,
-			item_id : "bSpe",
-			name : "Spells",
-			alignment : "align_center",
-		}
-		selectionDialogue.description.elements[0].elements[3].elements[2] = {};
 	};
 	
 	if (app.execDialog(selectionDialogue) === "ok") {
@@ -562,8 +637,8 @@ function resourceDecisionDialog() {
 		
 		//if something changed for the spells make the spell menu again
 		var oldCS = eval(remCS);
-		if (oldCS.globalExcl !== CurrentSources.globalExcl || oldCS.spellsExcl !== CurrentSources.spellsExcl) {
-			AddSpellsMenu = ParseSpellMenu();
+		if (oldCS.globalExcl !== CurrentSources.globalExcl || oldCS.classExcl !== CurrentSources.classExcl || oldCS.spellsExcl !== CurrentSources.spellsExcl) {
+			setSpellVariables(oldCS.spellsExcl !== CurrentSources.spellsExcl);
 		};
 	} else {
 		CurrentSources = eval(remCS);
@@ -577,18 +652,20 @@ function resourceSelectionDialog(type) {
 	for (var aSrc in SourceList) {
 		if (SourceList[aSrc].uniS) continue;
 		SourceList[aSrc].uniS = toSup(SourceList[aSrc].abbreviation);
-	}
+	};
 	
 	//a way to add the source abbreviation to the string
 	var amendSource = function(uString, uObj, altObj) {
 		var theSrc = uObj.source ? uObj.source : (altObj && altObj.source ? altObj.source : false);
+		theSrc = parseSource(theSrc);
 		if (theSrc) {
-			theSrc = isArray(theSrc) ? theSrc[0] : theSrc;
-			var theAbb = SourceList[theSrc] ? " " + SourceList[theSrc].uniS : "";
-			uString += theAbb;
-		}
+			for (var i = 0; i < theSrc.length; i++) {
+				if (CurrentSources.globalExcl.indexOf(theSrc[i][0]) !== -1) continue;
+				uString += " " + SourceList[theSrc[i][0]].uniS;
+			};
+		};
 		return uString;
-	}
+	};
 	
 	switch (type) {
 	 case "class" :
@@ -664,7 +741,7 @@ function resourceSelectionDialog(type) {
 			var uName = amendSource(FeatsList[u].name, FeatsList[u]);
 			var uTest = testSource(u, FeatsList[u], CSatt, true);
 			if (uTest === "source") continue;
-			var uGroup = u.match(/\[.+\]/) ? u.replace(/( ?\[.+\])/, "").capitalize() : false;
+			var uGroup = (/\[.+\]/).test(u) ? u.replace(/( ?\[.+\])/, "").capitalize() : false;
 			refObj[uName] = u;
 			if (uGroup) {
 				uGroup = amendSource(uGroup, FeatsList[u]);
@@ -690,8 +767,12 @@ function resourceSelectionDialog(type) {
 		for (var u in SpellsList) {
 			var uName = amendSource(SpellsList[u].name, SpellsList[u]);
 			var uTest = testSource(u, SpellsList[u], CSatt, true);
-			if (uTest === "source") continue;
-			var uGroup = spellSchoolList[SpellsList[u].school].capitalize();
+			if (uTest === "source" || !SpellsList[u] || !SpellsList[u].classes) continue;
+			if (spellSchoolList[SpellsList[u].school]) {
+				var uGroup = ((/avatar|awakened|immortal|nomad|wu jen/i).test(spellSchoolList[SpellsList[u].school]) ? "Order of " : "School of ") + spellSchoolList[SpellsList[u].school].capitalize();
+			} else {
+				var uGroup = SpellsList[u].level == 0 && SpellsList[u].classes[0] === "mystic" ? "Psionic Talents" : "Other";
+			};
 			refObj[uName] = u;
 			if (!exclObj[uGroup]) exclObj[uGroup] = {};
 			if (!inclObj[uGroup]) inclObj[uGroup] = {};
@@ -764,9 +845,68 @@ function resourceSelectionDialog(type) {
 			}
 		};
 		break;
+	 case "weapon" :
+		var theName = "Weapons/Attacks";
+		var CSatt = "weapExcl";
+		for (var u in WeaponsList) {
+			var uName = amendSource(WeaponsList[u].name, WeaponsList[u]);
+			var uTest = testSource(u, WeaponsList[u], CSatt, true);
+			if (uTest === "source") continue;
+			
+			var uGroup = !(/martial|simple/i).test(WeaponsList[u].type) ? WeaponsList[u].type : !WeaponsList[u].list ? "Other" : WeaponsList[u].type + " - " + WeaponsList[u].list;
+			refObj[uName] = u;
+			if (!exclObj[uGroup]) exclObj[uGroup] = {};
+			if (!inclObj[uGroup]) inclObj[uGroup] = {};
+			if (uTest) {
+				exclObj[uGroup][uName] = -1;
+			} else {
+				inclObj[uGroup][uName] = -1;
+			}
+		};
+		break;
+	 case "ammo" :
+		var theName = "Ammunition";
+		var CSatt = "ammoExcl";
+		for (var u in AmmoList) {
+			var uName = AmmoList[u].name;
+			var uTest = testSource(u, AmmoList[u], CSatt, true);
+			if (uTest === "source") continue;
+			
+			var ammSource = parseSource(AmmoList[u].source);
+			var uGroup = ammSource ? SourceList[ammSource[0][0]].name : "Homebrew";
+			refObj[uName] = u;
+			if (!exclObj[uGroup]) exclObj[uGroup] = {};
+			if (!inclObj[uGroup]) inclObj[uGroup] = {};
+			if (uTest) {
+				exclObj[uGroup][uName] = -1;
+			} else {
+				inclObj[uGroup][uName] = -1;
+			}
+		};
+		break;
+	 case "armor" :
+		var theName = "Armors";
+		var CSatt = "armorExcl";
+		for (var u in ArmourList) {
+			var uName = amendSource(ArmourList[u].name, ArmourList[u]);
+			var uTest = testSource(u, ArmourList[u], CSatt, true);
+			if (uTest === "source") continue;
+			var uGroup = ArmourList[u].type ? ArmourList[u].type.capitalize() : "Other";
+			refObj[uName] = u;
+			if (!exclObj[uGroup]) exclObj[uGroup] = {};
+			if (!inclObj[uGroup]) inclObj[uGroup] = {};
+			if (uTest) {
+				exclObj[uGroup][uName] = -1;
+			} else {
+				inclObj[uGroup][uName] = -1;
+			}
+		};
+		break;
 	};
 	
 	exclObj = CleanObject(exclObj); inclObj = CleanObject(inclObj);
+	
+	var Text0 = "Please select which " + theName + " you want to exclude or include from being used by the sheet." + theExtra[0] + "\n\nNote that " + theName + " from sourcebooks that you excluded in the previous dialogue are not shown here at all.";
 	
 	var selectionDialogue = {
 		inclInA : inclInArr,
@@ -778,8 +918,7 @@ function resourceSelectionDialog(type) {
 		initialize : function (dialog) {
 			dialog.load({
 				"ExcL" : this.exclObject,
-				"IncL" : this.inclObject,
-				"txt0" : "Please select which " + theName + " you want to exclude or include from being used by the sheet." + theExtra[0] + "\n\nNote that " + theName + " from sourebooks that you excluded in the previous dialogue are not shown here at all."
+				"IncL" : this.inclObject
 			});
 		},
 		commit : function (dialog) {
@@ -853,6 +992,7 @@ function resourceSelectionDialog(type) {
 			this.exclActive = true;
 			this.inclActive = false;
 		},
+		bSrc : function (dialog) { MakeSourceMenu_SourceOptions(); },
 		description : {
 			name : "Pick which resources are excluded and included",
 			elements : [{
@@ -870,8 +1010,9 @@ function resourceSelectionDialog(type) {
 				}, {
 					type : "static_text",
 					item_id : "txt0",
-					char_height : 5 + theExtra[1],
-					width : 710
+					wrap_name : true,
+					width : 710,
+					name : Text0
 				}, {
 					type : "view",
 					align_children : "align_row",
@@ -890,19 +1031,19 @@ function resourceSelectionDialog(type) {
 						elements : [{
 							type : "button",
 							item_id : "BTRA",
-							name : ">>",
+							name : ">>"
 						}, {
 							type : "button",
 							item_id : "BTR1",
-							name : ">",
+							name : ">"
 						}, {
 							type : "button",
 							item_id : "BTL1",
-							name : "<",
+							name : "<"
 						}, {
 							type : "button",
 							item_id : "BTLA",
-							name : "<<",
+							name : "<<"
 						}]
 					}, {
 						type : "cluster",
@@ -912,12 +1053,23 @@ function resourceSelectionDialog(type) {
 							width : 250,
 							height : 250,
 							type : "hier_list_box",
-							item_id : "IncL",
+							item_id : "IncL"
 						}]
 					}]
 				}, {
-					type : "ok_cancel",
-					ok_name : "Apply",
+					type : "view", // the bottom row of buttons
+					align_children : "align_distribute",
+					alignment : "align_fill",
+					elements : [{
+						item_id : "bSrc",
+						type : "button",
+						alignment : "align_left",
+						name : "List Source Abbreviations"
+					}, {
+						type : "ok_cancel",
+						alignment : "align_right",
+						ok_name : "Apply"
+					}]
 				}]
 			}]
 		}
@@ -929,102 +1081,71 @@ function resourceSelectionDialog(type) {
 			var theA = selectionDialogue.exclArr[a];
 			CurrentSources[CSatt].push(refObj[theA]);
 		}
+		//include ammo for weapons now included
+		if (type === "weapon") {
+			for (var key in WeaponsList) {
+				var weaKey = WeaponsList[key];
+				if (testSource(key, weaKey, "weaponExcl")) continue;
+				if (weaKey.ammo && CurrentSources.ammoExcl.indexOf(weaKey.ammo) !== -1) CurrentSources.ammoExcl.splice(CurrentSources.ammoExcl.indexOf(weaKey.ammo), 1);
+			};
+		}
 	};
 };
 
 //a function to test if the input is not being excluded by the resource dialogue
 function testSource(key, obj, CSatt, concise) {
+	if (!obj.source) return false;
 	var theRe = false;
-	if (obj.source) {
-		var theSource = isArray(obj.source) ? obj.source[0] : obj.source;
-		theRe = SourceList[theSource] && CurrentSources.globalExcl.indexOf(theSource) !== -1;
-		if (theRe && concise) theRe = "source";
-	}
+	var tSrc = parseSource(obj.source);
+	if (tSrc) {
+		var srcExcluded = function(srcObj) {
+			return !SourceList[srcObj[0]] || CurrentSources.globalExcl.indexOf(srcObj[0]) !== -1;
+		};
+		var isExcl = tSrc.every(srcExcluded);
+		theRe = isExcl && concise ? "source" : isExcl;
+	};
 	if (!theRe && CSatt && CurrentSources[CSatt] && CurrentSources[CSatt].indexOf(key) !== -1) theRe = true;
 	return theRe;
 };
 
-function toSup(inString) {
-	var doChar = function(aChar) {
-		switch(aChar) {
-			case "1" : return "\xB9";
-			case "2" : return "\xB2";
-			case "3" : return "\xB3";
-			case "4" : return "\u2074";
-			case "5" : return "\u2075";
-			case "6" : return "\u2076";
-			case "7" : return "\u2077";
-			case "8" : return "\u2078";
-			case "9" : return "\u2079";
-			case "+" : return "\u207A";
-			case "-" : return "\u207B";
-			case "=" : return "\u207C";
-			case "(" : return "\u207D";
-			case ")" : return "\u207E";
-			case "A" : if (useCaps) return "\u1D2C";
-			case "a" : return "\u1D43";
-			case "B" : if (useCaps) return "\u1D2E";
-			case "b" : return "\u1D47";
-			case "C" :
-			case "c" : return "\u1D9C";
-			case "D" : if (useCaps) return "\u1D30";
-			case "d" : return "\u1D48";
-			case "E" : if (useCaps) return "\u1D31";
-			case "e" : return "\u1D49";
-			case "F" :
-			case "f" : return "\u1DA0";
-			case "G" : if (useCaps) return "\u1D33";
-			case "g" : return "\u1D4D";
-			case "H" : if (useCaps) return "\u1D34";
-			case "h" : return "\u02B0";
-			case "I" : if (useCaps) return "\u1D35";
-			case "i" : return "\u2071";
-			case "J" : if (useCaps) return "\u1D36";
-			case "j" : return "\u02B2";
-			case "K" : if (useCaps) return "\u1D37";
-			case "k" : return "\u1D4F";
-			case "L" : if (useCaps) return "\u1D38";
-			case "l" : return "\u02E1";
-			case "M" : if (useCaps) return "\u1D39";
-			case "m" : return "\u1D50";
-			case "N" : if (useCaps) return "\u1D3A";
-			case "n" : return "\u207F";
-			case "O" : if (useCaps) return "\u1D3C";
-			case "o" : return "\u1D52";
-			case "Q" :
-			case "P" : if (useCaps) return "\u1D3E";
-			case "q" :
-			case "p" : return "\u1D56";
-			case "R" : if (useCaps) return "\u1D3F";
-			case "r" : return "\u02B3";
-			case "S" :
-			case "s" : return "\u02E2";
-			case "T" : if (useCaps) return "\u1D40";
-			case "t" : return "\u1D57";
-			case "U" : if (useCaps) return "\u1D41";
-			case "u" : return "\u1D58";
-			case "V" : if (useCaps) return "\u2C7D";
-			case "v" : return "\u1D5B";
-			case "W" : if (useCaps) return "\u1D42";
-			case "w" : return "\u02B7";
-			case "X" :
-			case "x" : return "\u02E3";
-			case "Y" :
-			case "y" : return "\u02B8";
-			case "Z" :
-			case "z" : return "\u1DBB";
-		}
-		return aChar;
+//a function to make the source attribute into a consistent array [[source, page]]
+function parseSource(srcObj) {
+	if (!srcObj) return false;
+	var theRe = false;
+	if (!isArray(srcObj)) {
+		if (SourceList[srcObj]) theRe = [[srcObj, 0]];
+	} else if (srcObj.length === 2 && typeof srcObj[0] == "string" && !isArray(srcObj[1])) {
+		if (SourceList[srcObj[0]]) theRe = [srcObj];
+	} else {
+		theRe = [];
+		for (var i = 0; i < srcObj.length; i++) {
+			if (srcObj[i][0] && SourceList[srcObj[i][0]]) {
+				theRe.push([srcObj[i][0], srcObj[i][1] ? srcObj[i][1] : 0]);
+			};
+		};
 	};
-	var input = inString.split(/\:|\ |\.|\,|\_/);
-	var output = [];
-	var useCaps = true;
-	for (i = 0; i < input.length; i++) {
-		useCaps = !useCaps || input[i].match(/c|f|s|x|y|z/i) ? false : true;
-		output[i] = "";
-		for (c = 0; c < input[i].length; c++) {
-			output[i] += doChar(input[i].charAt(c));
-		}
-	}
-	return output.join("-");
+	return theRe;
+};
+
+//a function to make a readable string of the source
+// verbosity = full (full source name), abbr (source abbreviation), page (, page), first (only first one found that is included), multi (add line break after each entry)
+function stringSource(obj, verbosity, prefix, suffix) {
+	var theSrc = parseSource(obj.source);
+	if (theSrc) {
+		var theRe = "";
+		verbosity = verbosity.toLowerCase();
+		var sFull = verbosity.indexOf("full") !== -1;
+		var pFull = verbosity.indexOf("page") !== -1;
+		for (var i = 0; i < theSrc.length; i++) {
+			if (CurrentSources.globalExcl.indexOf(theSrc[i][0]) !== -1) continue;
+			if (theRe) theRe += !pFull ? ", " : verbosity.indexOf("multi") !== -1 ? ";\n" : "; ";
+			theRe += sFull ? SourceList[theSrc[i][0]].name : SourceList[theSrc[i][0]].abbreviation;
+			theRe += !theSrc[i][1] ? "" : (pFull ? ", page " : " ") + theSrc[i][1];
+			if (verbosity.indexOf("first") !== -1) break;
+		};
+		if (theRe && theRe.indexOf("\n") !== -1) theRe += ".";
+		return theRe ? (prefix ? prefix : "") + theRe + (suffix ? suffix : "") : "";
+	} else {
+		return "";
+	};
 };

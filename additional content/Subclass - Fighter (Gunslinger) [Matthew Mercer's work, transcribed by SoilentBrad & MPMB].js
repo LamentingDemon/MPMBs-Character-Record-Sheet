@@ -14,7 +14,7 @@
 				This is taken from the DMs Guild website (http://www.dmsguild.com/product/170778/)
 				This subclass is made by Matthew Mercer
 	Code by:	SoilentBrad & MorePurpleMoreBetter
-	Date:		2016-11-10 (sheet v12.5)
+	Date:		2017-09-21 (sheet v12.998)
 	
 	Please support the creator of this content (Matthew Mercer) and download his material from the DMs Guild website: http://www.dmsguild.com/browse.php?x=0&y=0&author=Matthew%20Mercer
 */
@@ -70,15 +70,16 @@ ClassSubList["gunslinger"] = {
 			source : ["MM:GMA", 2],
 			minlevel : 3,
 			description : "\n   " + "I gain proficiency with tinker's tools" + "\n   " + "I can use my tinker's tool to craft ammunition and repair damaged firearms" + "\n   " + "I can even use them to draw up and create new ones (DM's discretion)" + "\n   " + "Some intricate and experimental firearms can only be accessed through crafting",
-			eval : "AddTool(\"Tinker's tools\", \"Gunslinger (Gunsmith)\"); if (What(\"Too Text\") === \"Tool\") {Value(\"Too Text\", \"Tinker's Tools (Dex)\"); Checkbox(\"Too Prof\", true);}; AddAction(\"action\", \"Repair Misfire (DC 8 + misfire score)\", \"Gunslinger (Gunsmith)\");",
-			removeeval : "RemoveTool(\"Tinker's tools\", \"Gunslinger (Gunsmith)\"); if (What(\"Too Text\").toLowerCase().indexOf(\"Tinker's Tools\") !== -1) {Value(\"Too Text\", \"Tool\"); Checkbox(\"Too Prof\", false);}; RemoveAction(\"action\", \"Repair Misfire (DC 8 + misfire score)\", \"Gunslinger (Gunsmith)\");",
+			toolProfs : [["Tinker's tools", "Dex"]],
+			eval : "AddAction('action', 'Repair Misfire (DC 8 + misfire score)', 'Gunslinger (Gunsmith)');",
+			removeeval : "RemoveAction('action', 'Repair Misfire (DC 8 + misfire score)');"
 		},
 		"subclassfeature7" : {
 			name : "Quickdraw",
 			source : ["MM:GMA", 2],
 			minlevel : 7,
 			description : "\n   " + "I add my proficiency bonus to my initiative" + "\n   " + "I can stow a firearm and draw another as a single object interaction on my turn",
-			changeeval : "if (classes.known.fighter.level >= 7) {Value(\"Init Bonus\", What(\"Proficiency Bonus\"))}",
+			addMod : { type : "skill", field : "Init", mod : "Prof", text : "I add my proficiency bonus to my initiative rolls." }
 		},
 		"subclassfeature15" : {
 			name : "Lightning Reload",
@@ -111,9 +112,11 @@ SourceList["MM:GMA"] = {
 	url : "http://www.dmsguild.com/product/170778/"
 };
 
-WeaponsList["pistol"] = {
+WeaponsList["pistol-mm"] = {
 	regExpSearch : /^(?=.*pistol)(?!.*automatic).*$/i,
 	name : "Pistol",
+	source : ["MM:GMA", 3],
+	list : "firearm",
 	ability : 2,
 	type: "Firearms",
 	damage : [1, 10, "piercing"],
@@ -125,15 +128,18 @@ WeaponsList["pistol"] = {
 };
 AmmoList["pistol bullets"] = {
 	name : "Pistol Bullets",
+	source : ["MM:GMA", 3],
 	weight : 0.015,
 	icon : "Bullets",
 	checks : [".Bullet"],
 	display : 50,
 	invName : "Bullets, pistol"
 };
-WeaponsList["musket"] = {
+WeaponsList["musket-mm"] = {
 	regExpSearch : /musket/i,
 	name : "Musket",
+	source : ["MM:GMA", 3],
+	list : "firearm",
 	ability : 2,
 	type: "Firearms",
 	damage : [1, 12, "piercing"],
@@ -145,6 +151,7 @@ WeaponsList["musket"] = {
 };
 AmmoList["musket bullets"] = {
 	name : "Musket Bullets",
+	source : ["MM:GMA", 3],
 	weight : 0.025,
 	icon : "Bullets",
 	checks : [".Bullet"],
@@ -154,6 +161,8 @@ AmmoList["musket bullets"] = {
 WeaponsList["pepperbox"] = {
 	regExpSearch : /pepperbox/i,
 	name : "Pepperbox",
+	source : ["MM:GMA", 3],
+	list : "firearm",
 	ability : 2,
 	type: "Firearms",
 	damage : [1, 10, "piercing"],
@@ -165,6 +174,7 @@ WeaponsList["pepperbox"] = {
 };
 AmmoList["pepperbox bullets"] = {
 	name : "Pepperbox Bullets",
+	source : ["MM:GMA", 3],
 	weight : 0.015,
 	icon : "Bullets",
 	checks : [".Bullet"],
@@ -174,6 +184,8 @@ AmmoList["pepperbox bullets"] = {
 WeaponsList["scattergun"] = {
 	regExpSearch : /scattergun/i,
 	name : "Scattergun",
+	source : ["MM:GMA", 3],
+	list : "firearm",
 	ability : 2,
 	type: "Firearms",
 	damage : [1, 8, "piercing"],
@@ -185,6 +197,7 @@ WeaponsList["scattergun"] = {
 };
 AmmoList["scattergun shells"] = {
 	name : "Scattergun Shells",
+	source : ["MM:GMA", 3],
 	weight : 0.2,
 	icon : "Bullets",
 	checks : [".Bullet"],
@@ -194,6 +207,8 @@ AmmoList["scattergun shells"] = {
 WeaponsList["bad news"] = {
 	regExpSearch : /bad news/i,
 	name : "Bad News",
+	source : ["MM:GMA", 3],
+	list : "firearm",
 	ability : 2,
 	type: "Firearms",
 	damage : [2, 12, "piercing"],
@@ -205,6 +220,7 @@ WeaponsList["bad news"] = {
 };
 AmmoList["bad news bullets"] = {
 	name : "Bad News Bullets",
+	source : ["MM:GMA", 3],
 	weight : 0.05,
 	icon : "Bullets",
 	checks : [".Bullet"],
@@ -214,6 +230,8 @@ AmmoList["bad news bullets"] = {
 WeaponsList["hand mortar"] = {
 	regExpSearch : /hand mortar/i,
 	name : "Hand Mortar",
+	source : ["MM:GMA", 3],
+	list : "firearm",
 	ability : 2,
 	type: "Firearms",
 	damage : [2, 8, "fire"],
@@ -225,6 +243,7 @@ WeaponsList["hand mortar"] = {
 };
 AmmoList["hand mortar grenades"] = {
 	name : "Hand Mortar Grenades",
+	source : ["MM:GMA", 3],
 	weight : 0.65,
 	icon : "Bullets",
 	checks : [".Bullet"],
@@ -232,11 +251,4 @@ AmmoList["hand mortar grenades"] = {
 	invName : "Hand mortar grenades"
 };
 UpdateDropdown("ammo");	
-UpdateDropdown("weapon", [
-	"Pistol",
-	"Musket",
-	"Pepperbox",
-	"Scattergun",
-	"Bad News",
-	"Hand Mortar",
-]);
+UpdateDropdown("weapon");

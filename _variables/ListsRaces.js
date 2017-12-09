@@ -5,8 +5,12 @@ var RaceList = {
 		source : ["E", 5],
 		plural : "Aarakocra",
 		size : 3,
-		speed : ["25 ft\n50 ft fly", 15],
-		languages : ["Common", "Aarakocra", "Auran"],
+		speed : {
+			walk : { spd : 25, enc : 15 },
+			fly : { spd : 50, enc : 0 }
+		},
+//		speed : ["25 ft\n50 ft fly", 15],
+		languageProfs : ["Common", "Aarakocra", "Auran"],
 		weapons : ["talons"],
 		age : " rearch maturity by age 3 and live about 30 years",
 		height : " are about 5 feet tall",
@@ -15,7 +19,16 @@ var RaceList = {
 		weightMetric : " weigh between 36 and 45 kg",
 		improvements : "Aarakocra: +2 Dexterity, +1 Wisdom;",
 		scores : [0, 2, 0, 0, 1, 0],
-		trait : "Aarakocra (+2 Dexterity, +1 Wisdom)\n\nFlight: I have a flying speed of 50 feet. To use this speed, I can't be wearing medium or heavy armor.\n\nTalons: My unarmed strikes deal 1d4 slashing damage on a hit."
+		trait : "Aarakocra (+2 Dexterity, +1 Wisdom)\n\nFlight: I have a flying speed of 50 feet. To use this speed, I can't be wearing medium or heavy armor.\n\nTalons: My unarmed strikes deal 1d4 slashing damage on a hit.",
+		features : {
+			"talons" : {
+				name : "Talons",
+				minlevel : 1,
+				calcChanges : {
+					atkAdd : ["if ((/unarmed strike/i).test(WeaponName)) { fields.Damage_Type = 'slashing'; if (fields.Damage_Die == 1) {fields.Damage_Die = '1d4'; }; }; ", "I have talons, which cause my unarmed strikes to deal 1d4 slashing damage."]
+				}
+			}
+		}
 	},
 
 	"aasimar" : {
@@ -24,10 +37,12 @@ var RaceList = {
 		source : ["D", 286],
 		plural : "Aasimar",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Celestial"],
-		vision : "Darkvision 60 ft",
-		dmgres : ["necrotic", "radiant"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Celestial"],
+		vision : [["Darkvision", 60]],
+		dmgres : ["Necrotic", "Radiant"],
 		age : " reach adulthood in their late teens and live around 160 years",
 		height : " range from 5 to over 6 feet tall (4'8\" + 2d10\")",
 		weight : " weigh around 165 lb (110 + 2d10 \xD7 2d4 lb)",
@@ -41,7 +56,7 @@ var RaceList = {
 			name : "Celestial Legacy (level 1)",
 			spells : ["light"],
 			selection : ["light"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"lesser restoration" : {
@@ -55,8 +70,8 @@ var RaceList = {
 					name : "Celestial Legacy (level 3)",
 					spells : ["lesser restoration"],
 					selection : ["lesser restoration"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"daylight" : {
 				name : "Daylight",
@@ -69,8 +84,8 @@ var RaceList = {
 					name : "Celestial Legacy (level 5)",
 					spells : ["daylight"],
 					selection : ["daylight"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -82,10 +97,12 @@ var RaceList = {
 		plural : "Fallen Aasimar",
 		sortname : "Aasimar, Fallen",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Celestial"],
-		vision : "Darkvision 60 ft",
-		dmgres : ["necrotic", "radiant"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Celestial"],
+		vision : [["Darkvision", 60]],
+		dmgres : ["Necrotic", "Radiant"],
 		age : " reach adulthood in their late teens and live around 160 years",
 		height : " range from 5 to over 6 feet tall (4'9\" + 2d8\")",
 		weight : " weigh around 155 lb (110 + 2d8 \xD7 2d4 lb)",
@@ -99,7 +116,7 @@ var RaceList = {
 			name : "Light Bearer",
 			spells : ["light"],
 			selection : ["light"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"healing hands" : {
@@ -108,7 +125,7 @@ var RaceList = {
 				minlevel : 1,
 				recovery : "long rest",
 				additional : ["1 HP", "2 HP", "3 HP", "4 HP", "5 HP", "6 HP", "7 HP", "8 HP", "9 HP", "10 HP", "11 HP", "12 HP", "13 HP", "14 HP", "15 HP", "16 HP", "17 HP", "18 HP", "19 HP", "20 HP"],
-				action : ["action", ""],
+				action : ["action", ""]
 			},
 			"necrotic shroud" : {
 				name : "Necrotic Shroud",
@@ -117,8 +134,8 @@ var RaceList = {
 				recovery : "long rest",
 				additional : ["", "", "+3 damage", "+4 damage", "+5 damage", "+6 damage", "+7 damage", "+8 damage", "+9 damage", "+10 damage", "+11 damage", "+12 damage", "+13 damage", "+14 damage", "+15 damage", "+16 damage", "+17 damage", "+18 damage", "+19 damage", "+20 damage"],
 				action : ["action", " (start)"],
-				eval : "AddAction(\"bonus action\", \"Necrotic Shroud (end)\", \"being a Fallen Aasimar\");",
-				removeeval : "RemoveAction(\"bonus action\", \"Necrotic Shroud (end)\", \"being a Fallen Aasimar\");",
+				eval : "AddAction('bonus action', 'Necrotic Shroud (end)', 'being a Fallen Aasimar');",
+				removeeval : "RemoveAction('bonus action', 'Necrotic Shroud (end)');"
 			}
 		}
 	},
@@ -130,10 +147,12 @@ var RaceList = {
 		plural : "Protector Aasimar",
 		sortname : "Aasimar, Protector",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Celestial"],
-		vision : "Darkvision 60 ft",
-		dmgres : ["necrotic", "radiant"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Celestial"],
+		vision : [["Darkvision", 60]],
+		dmgres : ["Necrotic", "Radiant"],
 		age : " reach adulthood in their late teens and live around 160 years",
 		height : " range from 5 to over 6 feet tall (4'9\" + 2d8\")",
 		weight : " weigh around 155 lb (110 + 2d8 \xD7 2d4 lb)",
@@ -146,7 +165,7 @@ var RaceList = {
 			name : "Light Bearer",
 			spells : ["light"],
 			selection : ["light"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"healing hands" : {
@@ -155,7 +174,7 @@ var RaceList = {
 				minlevel : 1,
 				recovery : "long rest",
 				additional : ["1 HP", "2 HP", "3 HP", "4 HP", "5 HP", "6 HP", "7 HP", "8 HP", "9 HP", "10 HP", "11 HP", "12 HP", "13 HP", "14 HP", "15 HP", "16 HP", "17 HP", "18 HP", "19 HP", "20 HP"],
-				action : ["action", ""],
+				action : ["action", ""]
 			},
 			"radiant soul" : {
 				name : "Radiant Soul",
@@ -164,8 +183,8 @@ var RaceList = {
 				recovery : "long rest",
 				additional : ["", "", "+3 damage", "+4 damage", "+5 damage", "+6 damage", "+7 damage", "+8 damage", "+9 damage", "+10 damage", "+11 damage", "+12 damage", "+13 damage", "+14 damage", "+15 damage", "+16 damage", "+17 damage", "+18 damage", "+19 damage", "+20 damage"],
 				action : ["action", " (start)"],
-				eval : "AddAction(\"bonus action\", \"Radiant Soul (end)\", \"being a Protector Aasimar\");",
-				removeeval : "RemoveAction(\"bonus action\", \"Radiant Soul (end)\", \"being a Protector Aasimar\");",
+				eval : "AddAction('bonus action', 'Radiant Soul (end)', 'being a Protector Aasimar');",
+				removeeval : "RemoveAction('bonus action', 'Radiant Soul (end)');"
 			}
 		}
 	},
@@ -177,10 +196,12 @@ var RaceList = {
 		plural : "Scourge Aasimar",
 		sortname : "Aasimar, Scourge",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Celestial"],
-		vision : "Darkvision 60 ft",
-		dmgres : ["necrotic", "radiant"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Celestial"],
+		vision : [["Darkvision", 60]],
+		dmgres : ["Necrotic", "Radiant"],
 		age : " reach adulthood in their late teens and live around 160 years",
 		height : " range from 5 to over 6 feet tall (4'9\" + 2d8\")",
 		weight : " weigh around 155 lb (110 + 2d8 \xD7 2d4 lb)",
@@ -193,7 +214,7 @@ var RaceList = {
 			name : "Light Bearer",
 			spells : ["light"],
 			selection : ["light"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"healing hands" : {
@@ -202,17 +223,20 @@ var RaceList = {
 				minlevel : 1,
 				recovery : "long rest",
 				additional : ["1 HP", "2 HP", "3 HP", "4 HP", "5 HP", "6 HP", "7 HP", "8 HP", "9 HP", "10 HP", "11 HP", "12 HP", "13 HP", "14 HP", "15 HP", "16 HP", "17 HP", "18 HP", "19 HP", "20 HP"],
-				action : ["action", ""],
+				action : ["action", ""]
 			},
 			"radiant consumption" : {
 				name : "Radiant Consumption",
 				usages : 1,
 				minlevel : 3,
 				recovery : "long rest",
-				additional : ["", "", "1/3 damage", "2/4 damage", "2/5 damage", "3/6 damage", "3/7 damage", "4/8 damage", "4/9 damage", "5/10 damage", "5/11 damage", "6/12 damage", "6/13 damage", "7/14 damage", "7/15 damage", "8/16 damage", "8/17 damage", "9/18 damage", "9/19 damage", "10/20 damage"],
+				additional : levels.map(function (n) {
+					if (n < 3) return ""
+					return  Math.ceil(n/2) + "/" + n + " damage";
+				}),
 				action : ["action", " (start)"],
-				eval : "AddAction(\"bonus action\", \"Radiant Consumption (end)\", \"being a Scourge Aasimar\");",
-				removeeval : "RemoveAction(\"bonus action\", \"Radiant Consumption (end)\", \"being a Scourge Aasimar\");",
+				eval : "AddAction('bonus action', 'Radiant Consumption (end)', 'being a Scourge Aasimar');",
+				removeeval : "RemoveAction('bonus action', 'Radiant Consumption (end)');"
 			}
 		}
 	},
@@ -223,9 +247,11 @@ var RaceList = {
 		source : ["V", 119],
 		plural : "Bugbears",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Goblin"],
-		vision : "Darkvision 60 ft",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Goblin"],
+		vision : [["Darkvision", 60]],
 		skills : ["Stealth"],
 		age : " rearch adulthood at age 16 and live up to 80 years",
 		height : " are between 6 and 8 feet tall (6'0\" + 2d12\")",
@@ -240,12 +266,12 @@ var RaceList = {
 				minlevel : 1,
 				usages : 1,
 				recovery : "Combat",
-				tooltip : "",
-			},
+				tooltip : ""
+			}
 		},
 		trait : "Bugbear (+2 Strength, +1 Dexterity)\nPowerful Build: I count as one size larger when determining my carrying capacity and the weight I can push, drag, or lift.\nLong-Limbed: I have an additional 5 feet reach with melee attacks that I make on my turn.\nSurprise Attack: If I hit a surprised creature on my first turn in combat, that attack deals an extra 2d6 damage. I can do this only once per combat.",
-		eval : "tDoc.getField(\"Carrying Capacity Multiplier\").value *= 2;",
-		removeeval : "tDoc.getField(\"Carrying Capacity Multiplier\").value /= 2;"
+		eval : "tDoc.getField('Carrying Capacity Multiplier').value *= 2;",
+		removeeval : "tDoc.getField('Carrying Capacity Multiplier').value /= 2;"
 	},
 
 	"dragonborn" : {
@@ -254,8 +280,11 @@ var RaceList = {
 		source : ["P", 34],
 		plural : "Dragonborn",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Draconic"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Draconic"],
+		weapons : ["breath weapon"],
 		age : " reach adulthood by 15 and live around 80 years",
 		height : " stand well over 6 feet tall (5'6\" + 2d8\")",
 		weight : " weigh around 240 lb (175 + 2d8 \xD7 2d6 lb)",
@@ -264,7 +293,6 @@ var RaceList = {
 		improvements : "Dragonborn: +2 Strength, +1 Charisma;",
 		scores : [2, 0, 0, 0, 0, 1],
 		trait : "Dragonborn (+2 Strength, +1 Charisma)\nDraconic Ancestry: Choose one type of dragon using the \"Racial Options\" button. I gain a breath weapon and damage resistance as determined by the dragon type chosen.\nBreath Weapon: Exhale destructive energy as an action with a size, shape, saving throw type, and damage type as found in the table. All in the area must make a saving throw with DC 8 + Con modifier + prof bonus. It does 2d6 (+1d6 at level 6, 11, 16) damage, half as much damage on a successful save. I can use it again after a short rest.",
-		abilitySave : 3,
 		features : {
 			"breath weapon" : {
 				name : "Breath Weapon",
@@ -273,10 +301,14 @@ var RaceList = {
 				additional : ["2d6", "2d6", "2d6", "2d6", "2d6", "3d6", "3d6", "3d6", "3d6", "3d6", "4d6", "4d6", "4d6", "4d6", "4d6", "5d6", "5d6", "5d6", "5d6", "5d6"],
 				recovery : "short rest",
 				tooltip : " (Draconic Ancestry)",
-				action : ["action", ""]
+				action : ["action", ""],
+				calcChanges : {
+					atkAdd : ["if (WeaponName === 'breath weapon' && CurrentRace.known === 'dragonborn' && CurrentRace.variant) { fields.Damage_Type = CurrentRace.dmgres[0]; fields.Description = fields.Description.replace(/(dex|con) save/i, ((/cold|poison/i).test(CurrentRace.dmgres[0]) ? 'Con' : 'Dex') + ' save'); fields.Range = (/black|blue|brass|bronze|copper/i).test(CurrentRace.variant) ? '5-ft \u00D7 30-ft line' : '15-ft cone'; }; ", "As a Dragonborn I have a breath weapon. The damage type, range, and type of saving throw are dependent on which variant of Dragonborn I am. Furthermore, the amount of damage is dependent on my character level."],
+					atkCalc : ["if (WeaponName === 'breath weapon' && CurrentRace.known === 'dragonborn' && CurrentRace.level > 5) { output.die = output.die.replace('2d6', (CurrentRace.level < 11 ? 3 : CurrentRace.level < 16 ? 4 : 5) + 'd6'); }; ", ""]
+				}
 			}
 		},
-		variants : ["black", "blue", "brass", "bronze", "copper", "gold", "green", "red", "silver", "white"],
+		variants : ["black", "blue", "brass", "bronze", "copper", "gold", "green", "red", "silver", "white"]
 	},
 
 	"gray dwarf" : {
@@ -286,13 +318,15 @@ var RaceList = {
 		source : ["S", 104],
 		plural : "Duergar",
 		size : 3,
-		speed : [25, 25],
-		languages : ["Common", "Dwarvish", "Undercommon"],
-		vision : "Darkvision 120 ft; Sunlight Sensitivity",
-		savetxt : "Adv. vs. Poison, illusions, and being charmed or paralyzed",
-		dmgres : ["poison"],
+		speed : {
+			walk : { spd : 25, enc : 25 }
+		},
+		languageProfs : ["Common", "Dwarvish", "Undercommon"],
+		vision : [["Darkvision", 120], ["Sunlight Sensitivity", 0]],
+		savetxt : { adv_vs : ["charmed", "illusions", "paralyzed", "poison"] },
+		dmgres : ["Poison"],
 		weaponprofs : [false, false, ["battleaxe", "handaxe", "warhammer", "light hammer"]],
-		tools : ["smith, brewer, or mason tools"],
+		toolProfs : [["Smith, brewer, or mason tools", 1]],
 		age : " are considered young until they are 50 and live about 350 years",
 		height : " stand between 4 and 5 feet tall (3'8\" + 2d4\")",
 		weight : " weigh around 150 lb (115 + 2d4 \xD7 2d6 lb)",
@@ -314,8 +348,8 @@ var RaceList = {
 					name : "Duergar Magic (level 3)",
 					spells : ["enlarge/reduce"],
 					selection : ["enlarge/reduce"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"invisibility" : {
 				name : "Invisibility (self only)",
@@ -328,8 +362,8 @@ var RaceList = {
 					name : "Duergar Magic (level 5)",
 					spells : ["invisibility"],
 					selection : ["invisibility"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -341,13 +375,15 @@ var RaceList = {
 		source : ["P", 20],
 		plural : "Hill dwarves",
 		size : 3,
-		speed : [25, 25],
-		languages : ["Common", "Dwarvish"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. vs. Poison",
-		dmgres : ["poison"],
+		speed : {
+			walk : { spd : 25, enc : 25 }
+		},
+		languageProfs : ["Common", "Dwarvish"],
+		vision : [["Darkvision", 60]],
+		savetxt : { adv_vs : ["poison"] },
+		dmgres : ["Poison"],
 		weaponprofs : [false, false, ["battleaxe", "handaxe", "warhammer", "light hammer"]],
-		tools : ["smith, brewer, or mason tools"],
+		toolProfs : [["Smith, brewer, or mason tools", 1]],
 		age : " are considered young until they are 50 and live about 350 years",
 		height : " stand between 4 and 5 feet tall (3'8\" + 2d4\")",
 		weight : " weigh around 150 lb (115 + 2d4 \xD7 2d6 lb)",
@@ -374,14 +410,16 @@ var RaceList = {
 		source : ["P", 20],
 		plural : "Mountain dwarves",
 		size : 3,
-		speed : [25, 25],
-		languages : ["Common", "Dwarvish"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. vs. Poison",
-		dmgres : ["poison"],
+		speed : {
+			walk : { spd : 25, enc : 25 }
+		},
+		languageProfs : ["Common", "Dwarvish"],
+		vision : [["Darkvision", 60]],
+		savetxt : { adv_vs : ["poison"] },
+		dmgres : ["Poison"],
 		weaponprofs : [false, false, ["battleaxe", "handaxe", "warhammer", "light hammer"]],
 		armor : [true, true, false, false],
-		tools : ["smith, brewer, or mason tools"],
+		toolProfs : [["Smith, brewer, or mason tools", 1]],
 		age : " are considered young until they are 50 and live about 350 years",
 		height : " stand between 4 and 5 feet tall (4' + 2d4\")",
 		weight : " weigh around 150 lb (130 + 2d4 \xD7 2d6 lb)",
@@ -389,7 +427,7 @@ var RaceList = {
 		weightMetric : " weigh around 75 kg (60 + 5d4 \xD7 4d6 / 10 kg)",
 		improvements : "Mountain Dwarf: +2 Strength, +2 Constitution;",
 		scores : [2, 0, 2, 0, 0, 0],
-		trait : "Mountain Dwarf (+2 Strength, +2 Constitution)\n\nStonecunning:\n   Whenever I make an Intelligence (History) check related to the origin of stonework, I am considered proficient in the History skill and add double my proficiency bonus to the check, instead of my normal proficiency bonus.",
+		trait : "Mountain Dwarf (+2 Strength, +2 Constitution)\n\nStonecunning:\n   Whenever I make an Intelligence (History) check related to the origin of stonework, I am considered proficient in the History skill and add double my proficiency bonus to the check, instead of my normal proficiency bonus."
 	},
 
 	"dark elf" : {
@@ -399,10 +437,15 @@ var RaceList = {
 		source : ["P", 24],
 		plural : "Drow",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Elvish"],
-		vision : "Darkvision 120 ft; Sunlight Sensitivity",
-		savetxt : "Adv. on saves vs. being charmed; Magic can't put me to sleep",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Elvish"],
+		vision : [["Darkvision", 120], ["Sunlight Sensitivity", 0]],
+		savetxt : {
+			text : ["Magic can't put me to sleep"],
+			adv_vs : ["charmed"]
+		},
 		weaponprofs : [false, false, ["rapier", "shortsword", "hand crossbow"]],
 		skills : ["Perception"],
 		age : " typically claim adulthood around age 100 and can live to be 750 years old",
@@ -419,7 +462,7 @@ var RaceList = {
 			name : "Drow Magic (level 1)",
 			spells : ["dancing lights"],
 			selection : ["dancing lights"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"faerie fire" : {
@@ -433,8 +476,8 @@ var RaceList = {
 					name : "Drow Magic (level 3)",
 					spells : ["faerie fire"],
 					selection : ["faerie fire"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"darkness" : {
 				name : "Darkness",
@@ -447,8 +490,8 @@ var RaceList = {
 					name : "Drow Magic (level 5)",
 					spells : ["darkness"],
 					selection : ["darkness"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -460,16 +503,21 @@ var RaceList = {
 		source : ["D", 286],
 		plural : "Eladrin",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Elvish"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. vs. being charmed; Magic can't put me to sleep",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Elvish"],
+		vision : [["Darkvision", 60]],
+		savetxt : {
+			text : ["Magic can't put me to sleep"],
+			adv_vs : ["charmed"]
+		},
 		weaponprofs : [false, false, ["longsword", "shortsword", "longbow", "shortbow"]],
 		skills : ["Perception"],
 		age : " typically claim adulthood around age 100 and can live to be 750 years old",
-		height : " range from under 5 to over 6 feet tall (4'6\" + 2d10\")",
+		height : " range from under 5 to over 6 feet tall (4'6\" + 2d12\")",
 		weight : " weigh around 115 lb (90 + 2d10 \xD7 1d4 lb)",
-		heightMetric : " range from under 1,5 to over 1,8 metres tall (140 + 5d10 cm)",
+		heightMetric : " range from under 1,5 to over 1,8 metres tall (140 + 5d12 cm)",
 		weightMetric : " weigh around 55 kg (40 + 5d10 \xD7 2d4 / 10 kg)",
 		improvements : "Eladrin: +2 Dexterity, +1 Intelligence;",
 		scores : [0, 2, 0, 1, 0, 0],
@@ -487,8 +535,8 @@ var RaceList = {
 					name : "Fey Step",
 					spells : ["misty step"],
 					selection : ["misty step"],
-					oncesr : true,
-				},
+					oncesr : true
+				}
 			}
 		}
 	},
@@ -500,10 +548,15 @@ var RaceList = {
 		source : ["P", 23],
 		plural : "High elves",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Elvish", "+1 from High Elf"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. vs. being charmed; Magic can't put me to sleep",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Elvish", 1],
+		vision : [["Darkvision", 60]],
+		savetxt : {
+			text : ["Magic can't put me to sleep"],
+			adv_vs : ["charmed"]
+		},
 		weaponprofs : [false, false, ["longsword", "shortsword", "longbow", "shortbow"]],
 		skills : ["Perception"],
 		age : " typically claim adulthood around age 100 and can live to be 750 years old",
@@ -520,8 +573,8 @@ var RaceList = {
 			name : "High Elf Cantrip",
 			class : "wizard",
 			level : [0, 0],
-			atwill : true,
-		},
+			atwill : true
+		}
 	},
 
 	"wood elf" : {
@@ -531,10 +584,15 @@ var RaceList = {
 		source : ["P", 24],
 		plural : "Wood elves",
 		size : 3,
-		speed : [35, 25],
-		languages : ["Common", "Elvish"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. vs. being charmed; Magic can't put me to sleep",
+		speed : {
+			walk : { spd : 35, enc : 25 }
+		},
+		languageProfs : ["Common", "Elvish"],
+		vision : [["Darkvision", 60]],
+		savetxt : {
+			text : ["Magic can't put me to sleep"],
+			adv_vs : ["charmed"]
+		},
 		weaponprofs : [false, false, ["longsword", "shortsword", "longbow", "shortbow"]],
 		skills : ["Perception"],
 		age : " typically claim adulthood around age 100 and can live to be 750 years old",
@@ -544,7 +602,7 @@ var RaceList = {
 		weightMetric : " weigh around 55 kg (40 + 5d10 \xD7 2d4 / 10 kg)",
 		improvements : "Wood Elf: +2 Dexterity, +1 Wisdom;",
 		scores : [0, 2, 0, 0, 1, 0],
-		trait : "Wood Elf (+2 Dexterity, +1 Wisdom)\nTrance: Elves don't need to sleep, but meditate semiconsciously, for 4 hours a day. While meditating, I can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, I gain the same benefit that a human does from 8 hours of sleep, but I still need 8 hours for a long rest.\nMask of the Wild: I can attempt to hide even when I am only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena.",
+		trait : "Wood Elf (+2 Dexterity, +1 Wisdom)\nTrance: Elves don't need to sleep, but meditate semiconsciously, for 4 hours a day. While meditating, I can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, I gain the same benefit that a human does from 8 hours of sleep, but I still need 8 hours for a long rest.\nMask of the Wild: I can attempt to hide even when I am only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena."
 	},
 
 	"firbolg" : {
@@ -553,8 +611,10 @@ var RaceList = {
 		source : ["V", 106],
 		plural : "Firbolg",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Elvish", "Giant"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Elvish", "Giant"],
 		age : " reach adulthood around 30 and can live for 500 years",
 		height : " are between 6 and half and 8 feet tall (6'2\" + 2d12\")",
 		weight : " weigh between 240 and 300 lb (175 + 2d12 \xD7 2d6 lb)",
@@ -577,7 +637,7 @@ var RaceList = {
 					name : "Firbolg Magic",
 					spells : ["detect magic"],
 					selection : ["detect magic"],
-					oncesr : true,
+					oncesr : true
 				}
 			},
 			"firbolg magic (disguise self)" : {
@@ -591,7 +651,7 @@ var RaceList = {
 					name : "Firbolg Magic",
 					spells : ["disguise self"],
 					selection : ["disguise self"],
-					oncesr : true,
+					oncesr : true
 				}
 			},
 			"hidden step" : {
@@ -600,11 +660,11 @@ var RaceList = {
 				usages : 1,
 				recovery : "short rest",
 				tooltip : " (Hidden Step)",
-				action : ["bonus action", ""],
+				action : ["bonus action", ""]
 			}
 		},
-		eval : "tDoc.getField(\"Carrying Capacity Multiplier\").value *= 2;",
-		removeeval : "tDoc.getField(\"Carrying Capacity Multiplier\").value /= 2;"
+		eval : "tDoc.getField('Carrying Capacity Multiplier').value *= 2;",
+		removeeval : "tDoc.getField('Carrying Capacity Multiplier').value /= 2;"
 	},
 
 	"air genasi" : {
@@ -614,8 +674,10 @@ var RaceList = {
 		source : ["E", 9],
 		plural : "Air genasi",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Primordial"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Primordial"],
 		age : " reach adulthood in their late teens and live up to 120 years",
 		height : " range from barely 5 to well over 6 feet tall (4'8\" + 2d10\")",
 		weight : " weigh around 165 lb (110 + 2d10 \xD7 2d4 lb)",
@@ -638,8 +700,8 @@ var RaceList = {
 					name : "Mingle with the Wind",
 					spells : ["levitate"],
 					selection : ["levitate"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -651,8 +713,10 @@ var RaceList = {
 		source : ["E", 9],
 		plural : "Earth genasi",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Primordial"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Primordial"],
 		age : " reach adulthood in their late teens and live up to 120 years",
 		height : " range from barely 5 to well over 6 feet tall (4'8\" + 2d10\")",
 		weight : " weigh around 165 lb (110 + 2d10 \xD7 2d4 lb)",
@@ -674,8 +738,8 @@ var RaceList = {
 					name : "Merge with Stone",
 					spells : ["pass without trace"],
 					selection : ["pass without trace"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -686,11 +750,13 @@ var RaceList = {
 		sortname : "Genasi, Fire",
 		source : ["E", 9],
 		plural : "Fire genasi",
-		vision : "Darkvision 60 ft",
+		vision : [["Darkvision", 60]],
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Primordial"],
-		dmgres : ["fire"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Primordial"],
+		dmgres : ["Fire"],
 		age : " reach adulthood in their late teens and live up to 120 years",
 		height : " range from barely 5 to well over 6 feet tall (4'8\" + 2d10\")",
 		weight : " weigh around 165 lb (110 + 2d10 \xD7 2d4 lb)",
@@ -705,7 +771,7 @@ var RaceList = {
 			name : "Reach to the Blaze (level 1)",
 			spells : ["produce flame"],
 			selection : ["produce flame"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"burning hands" : {
@@ -719,8 +785,8 @@ var RaceList = {
 					name : "Reach to the Blaze (level 3)",
 					spells : ["burning hands"],
 					selection : ["burning hands"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -732,9 +798,13 @@ var RaceList = {
 		source : ["E", 10],
 		plural : "Water genasi",
 		size : 3,
-		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
-		languages : ["Common", "Primordial"],
-		dmgres : ["acid"],
+		speed : {
+			walk : { spd : 30, enc : 20 },
+			swim : { spd : 30, enc : 20 }
+		},
+//		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
+		languageProfs : ["Common", "Primordial"],
+		dmgres : ["Acid"],
 		age : " reach adulthood in their late teens and live up to 120 years",
 		height : " range from barely 5 to well over 6 feet tall (4'8\" + 2d10\")",
 		weight : " weigh around 165 lb (110 + 2d10 \xD7 2d4 lb)",
@@ -748,7 +818,7 @@ var RaceList = {
 			name : "Call to the Wave (level 1)",
 			spells : ["shape water"],
 			selection : ["shape water"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"create or destroy water" : {
@@ -762,8 +832,8 @@ var RaceList = {
 					name : "Call to the Wave (level 3)",
 					spells : ["create or destroy water"],
 					selection : ["create or destroy water"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -772,13 +842,15 @@ var RaceList = {
 		regExpSearch : /^((?=.*svirfneblin)|((?=.*\bgnomes?\b)(?=.*\b(underdarks?|deep|depths?)\b))).*$/i,
 		name : "Svirfneblin",
 		sortname : "Gnome, Deep (Svirfneblin)",
-		source : ["E", 7],
+		source : [["E", 7], ["S", 115]],
 		plural : "Svirfneblin",
 		size : 4,
-		speed : [25, 15],
-		languages : ["Common", "Gnomish", "Undercommon"],
-		vision : "Darkvision 120 ft",
-		savetxt : "Adv. on Int/Wis/Cha saves vs. magic",
+		speed : {
+			walk : { spd : 25, enc : 15 }
+		},
+		languageProfs : ["Common", "Gnomish", "Undercommon"],
+		vision : [["Darkvision", 120]],
+		savetxt : { text : ["Adv. on Int/Wis/Cha saves vs. magic"] },
 		age : " are considered full-grown adults when they reach 25 and live 200 to 250 years",
 		height : " stand between 3 and 3 1/2 feet tall (2'9\" + 2d4\")",
 		weight : " weigh around 90 lb (80 + 2d4 \xD7 1d4 lb)",
@@ -786,7 +858,7 @@ var RaceList = {
 		weightMetric : " weigh around 50 kg (35 + 5d4 \xD7 4d4 / 10 kg)",
 		improvements : "Svirfneblin: +1 Dexterity, +2 Intelligence;",
 		scores : [0, 1, 0, 2, 0, 0],
-		trait : "Svirfneblin (+1 Dexterity, +2 Intelligence)\n\nStone Camouflage:\n   I have advantage on Dexterity (stealth) checks to hide in rocky terrain.",
+		trait : "Svirfneblin (+1 Dexterity, +2 Intelligence)\n\nStone Camouflage:\n   I have advantage on Dexterity (stealth) checks to hide in rocky terrain."
 	},
 
 	"forest gnome" : {
@@ -796,10 +868,12 @@ var RaceList = {
 		source : ["P", 37],
 		plural : "Forest gnomes",
 		size : 4,
-		speed : [25, 15],
-		languages : ["Common", "Gnomish"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. on Int/Wis/Cha saves vs. magic",
+		speed : {
+			walk : { spd : 25, enc : 15 }
+		},
+		languageProfs : ["Common", "Gnomish"],
+		vision : [["Darkvision", 60]],
+		savetxt : { text : ["Adv. on Int/Wis/Cha saves vs. magic"] },
 		age : " start adult life around age 40 and can live 350 to almost 500 years",
 		height : " are 3 to 4 feet tall (2'11\" + 2d4\")",
 		weight : " weigh around 40 lb (35 + 2d4 lb)",
@@ -814,8 +888,8 @@ var RaceList = {
 			name : "Natural Illusionist",
 			spells : ["minor illusion"],
 			selection : ["minor illusion"],
-			atwill : true,
-		},
+			atwill : true
+		}
 	},
 
 	"rock gnome" : {
@@ -825,11 +899,13 @@ var RaceList = {
 		source : ["P", 37],
 		plural : "Rock gnomes",
 		size : 4,
-		speed : [25, 15],
-		languages : ["Common", "Gnomish"],
-		tools : ["Tinker's tools"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. on Int/Wis/Cha saves vs. magic",
+		speed : {
+			walk : { spd : 25, enc : 15 }
+		},
+		languageProfs : ["Common", "Gnomish"],
+		toolProfs : ["Tinker's tools"],
+		vision : [["Darkvision", 60]],
+		savetxt : { text : ["Adv. on Int/Wis/Cha saves vs. magic"] },
 		age : " start adult life around age 40 and can live 350 to almost 500 years",
 		height : " are 3 to 4 feet tall (2'11\" + 2d4\")",
 		weight : " weigh around 40 lb (35 + 2d4 lb)",
@@ -837,7 +913,7 @@ var RaceList = {
 		weightMetric : " weigh around 18 kg (16 + 5d4 / 10 kg)",
 		improvements : "Rock Gnome: +1 Constitution, +2 Intelligence;",
 		scores : [0, 0, 1, 2, 0, 0],
-		trait : "Rock Gnome (+1 Constitution, +2 Intelligence)" + (typePF ? "\n" : " ") + "Artificer's Lore: Add twice my proficiency bonus to Intelligence (History) checks with magic, alchemical, and technological items.\nTinker: Construct a Tiny clockwork device (AC 5, 1 HP) using tinker's tools, 1 hour, and 10 gp of material components, that functions for 24 hours. I can have up to 3 active." + (typePF ? "\n - " : " -") + "Clockwork Toy: animal, monster, or person that can move 5 ft per turn in a random direction, making appropriate noises;" + (typePF ? "\n - " : " -") + "Fire Starter: 1 action to produce miniature flame to light things;" + (typePF ? "\n - " : " -") + "Music Box: plays single song at a moderate volume.",
+		trait : "Rock Gnome (+1 Constitution, +2 Intelligence)" + (typePF ? "\n" : " ") + "Artificer's Lore: Add twice my proficiency bonus to Intelligence (History) checks with magic, alchemical, and technological items.\nTinker: Construct a Tiny clockwork device (AC 5, 1 HP) using tinker's tools, 1 hour, and 10 gp of material components, that functions for 24 hours. I can have up to 3 active." + (typePF ? "\n - " : " -") + "Clockwork Toy: animal, monster, or person that can move 5 ft per turn in a random direction, making appropriate noises;" + (typePF ? "\n - " : " -") + "Fire Starter: 1 action to produce miniature flame to light things;" + (typePF ? "\n - " : " -") + "Music Box: plays single song at a moderate volume."
 	},
 	
 	"goblin" : {
@@ -846,9 +922,11 @@ var RaceList = {
 		source : ["V", 119],
 		plural : "Goblins",
 		size : 4,
-		speed : [30, 20],
-		languages : ["Common", "Goblin"],
-		vision : "Darkvision 60 ft",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Goblin"],
+		vision : [["Darkvision", 60]],
 		age : " rearch adulthood at age 8 and live up to 60 years",
 		height : " are between 3 and a half and 4 feet tall (3'5\" + 2d4\")",
 		weight : " weigh between 40 and 70 lb (35 + 2d4 \xD7 1d4 lb)",
@@ -863,12 +941,12 @@ var RaceList = {
 				usages : 1,
 				recovery : "short rest",
 				additional : ["+1 damage", "+2 damage", "+3 damage", "+4 damage", "+5 damage", "+6 damage", "+7 damage", "+8 damage", "+9 damage", "+10 damage", "+11 damage", "+12 damage", "+13 damage", "+14 damage", "+15 damage", "+16 damage", "+17 damage", "+18 damage", "+19 damage", "+20 damage"],
-				tooltip : "",
+				tooltip : ""
 			},
 			"nimble escape" : {
 				name : "Nimble Escape",
 				minlevel : 1,
-				action : ["bonus action", " (disengage/hide)"],
+				action : ["bonus action", " (disengage/hide)"]
 			}
 		},
 		trait : "Goblin (+2 Dexterity, +1 Constitution)\n\nFury of the Small: Once per short rest, when I hit a creature of a size category larger than mine, I deal extra damage equal to my level.\n\nNimble Escape: As a bonus action, I can take the Disengage or Hide action."
@@ -880,8 +958,10 @@ var RaceList = {
 		source : ["V", 108],
 		plural : "Goliaths",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Giant"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Giant"],
 		skills : ["Athletics"],
 		age : " reach adulthood in their late teens and live less than 100 years",
 		height : " are between 6 and a half and 8 feet tall (6'2\" + 2d10\")",
@@ -900,9 +980,9 @@ var RaceList = {
 				action : ["reaction", ""]
 			}
 		},
-		trait : "Goliath (+2 Strength, +1 Constitution)" + (typePF ? "\n" : "") + "\nStone's Endurance: Once per short rest, when I take damage, I can use my reaction to reduce the damage by 1d12 + my Con" + (typePF ? "" : "stitution") + " modifier." + (typePF ? "\n" : "") + "\nPowerful Build: I count as one size larger when determining my carrying capacity and the weight I can push, drag, or lift." + (typePF ? "\n" : "") + "\nMountain Born: I'm acclimated to high altitude, including elevations above 20,000 feet. I'm also naturally adapted to cold climates.",
-		eval : "tDoc.getField(\"Carrying Capacity Multiplier\").value *= 2;",
-		removeeval : "tDoc.getField(\"Carrying Capacity Multiplier\").value /= 2;"
+		trait : "Goliath (+2 Strength, +1 Constitution)" + (typePF ? "\n" : "") + "\nStone's Endurance: Once per short rest, when I take damage, I can use my reaction to reduce the damage by 1d12 + my Con" + (typePF ? "" : "stitution") + " modifier." + (typePF ? "\n" : "") + "\nPowerful Build: I count as one size larger when determining my carrying capacity and the weight I can push, drag, or lift." + (typePF ? "\n" : "") + "\nMountain Born: I'm acclimated to high altitude, including elevations above 20000 feet. I'm also naturally adapted to cold climates.",
+		eval : "tDoc.getField('Carrying Capacity Multiplier').value *= 2;",
+		removeeval : "tDoc.getField('Carrying Capacity Multiplier').value /= 2;"
 	},
 
 	"ghostwise halfling" : {
@@ -912,9 +992,11 @@ var RaceList = {
 		plural : "Ghostwise halflings",
 		source : ["S", 110],
 		size : 4,
-		speed : [25, 15],
-		languages : ["Common", "Halfling"],
-		savetxt : "Adv. vs. being frightened",
+		speed : {
+			walk : { spd : 25, enc : 15 }
+		},
+		languageProfs : ["Common", "Halfling"],
+		savetxt : { adv_vs : ["frightened"] },
 		age : " reach adulthood at age 20 and live around 150 years",
 		height : " average about 3 feet tall (2'7\" + 2d4\")",
 		weight : " weigh around 40 lb (35 + 2d4 lb)",
@@ -922,7 +1004,7 @@ var RaceList = {
 		weightMetric : " weigh around 18 kg (16 + 5d4 / 10 kg)",
 		improvements : "Ghostwise Halfling: +2 Dexterity, +1 Wisdom;",
 		scores : [0, 2, 0, 0, 1, 0],
-		trait : "Ghostwise Halfling (+2 Dexterity, +1 Wisdom)" + (typePF ? "\n" : " ") + "\nLucky: When I roll a 1 on an attack roll, ability check, or saving throw, I can reroll the die and must use the new roll." + (typePF ? "\n" : " ") + "\nHalfling Nimbleness: I can move through the space of any creature that is of a size larger than me." + (typePF ? "\n" : " ") + "\nSilent Speech: I can speak telepathically to any one creature within 30 feet of me. It only understands me if we share a language.",
+		trait : "Ghostwise Halfling (+2 Dexterity, +1 Wisdom)" + (typePF ? "\n" : " ") + "\nLucky: When I roll a 1 on an attack roll, ability check, or saving throw, I can reroll the die and must use the new roll." + (typePF ? "\n" : " ") + "\nHalfling Nimbleness: I can move through the space of any creature that is of a size larger than me." + (typePF ? "\n" : " ") + "\nSilent Speech: I can speak telepathically to any one creature within 30 feet of me. It only understands me if we share a language."
 	},
 
 	"lightfoot halfling" : {
@@ -932,9 +1014,11 @@ var RaceList = {
 		source : ["P", 28],
 		plural : "Lightfoot halflings",
 		size : 4,
-		speed : [25, 15],
-		languages : ["Common", "Halfling"],
-		savetxt : "Adv. vs. being frightened",
+		speed : {
+			walk : { spd : 25, enc : 15 }
+		},
+		languageProfs : ["Common", "Halfling"],
+		savetxt : { adv_vs : ["frightened"] },
 		age : " reach adulthood at age 20 and live around 150 years",
 		height : " average about 3 feet tall (2'7\" + 2d4\")",
 		weight : " weigh around 40 lb (35 + 2d4 lb)",
@@ -942,7 +1026,7 @@ var RaceList = {
 		weightMetric : " weigh around 18 kg (16 + 5d4 / 10 kg)",
 		improvements : "Lightfoot Halfling: +2 Dexterity, +1 Charisma;",
 		scores : [0, 2, 0, 0, 0, 1],
-		trait : "Lightfoot Halfling (+2 Dexterity, +1 Charisma)" + (typePF ? "\n" : " ") + "\nLucky: When I roll a 1 on an attack roll, ability check, or saving throw, I can reroll the die and must use the new roll." + (typePF ? "\n" : " ") + "\nHalfling Nimbleness: I can move through the space of any creature that is of a size larger than me." + (typePF ? "\n" : " ") + "\nNaturally Stealthy: I can attempt to hide even when I am obscured only by a creature that is at least one size larger than me.",
+		trait : "Lightfoot Halfling (+2 Dexterity, +1 Charisma)" + (typePF ? "\n" : "") + "\nLucky: When I roll a 1 on an attack roll, ability check, or saving throw, I can reroll the die and must use the new roll." + (typePF ? "\n" : "") + "\nHalfling Nimbleness: I can move through the space of any creature that is of a size larger than me." + (typePF ? "\n" : "") + "\nNaturally Stealthy: I can attempt to hide even when I am obscured only by a creature that is at least one size larger than me."
 	},
 
 	"stout halfling" : {
@@ -952,10 +1036,12 @@ var RaceList = {
 		source : ["P", 28],
 		plural : "Stout halflings",
 		size : 4,
-		speed : [25, 15],
-		languages : ["Common", "Halfling"],
-		savetxt : "Adv. vs. frightened/Poison",
-		dmgres : ["poison"],
+		speed : {
+			walk : { spd : 25, enc : 15 }
+		},
+		languageProfs : ["Common", "Halfling"],
+		savetxt : { adv_vs : ["frightened", "poison"] },
+		dmgres : ["Poison"],
 		age : " reach adulthood at age 20 and live around 150 years",
 		height : " average about 3 feet tall (2'7\" + 2d4\")",
 		weight : " weigh around 40 lb (35 + 2d4 lb)",
@@ -972,10 +1058,15 @@ var RaceList = {
 		source : ["P", 39],
 		plural : "Half-elves",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Elvish", "+1 from Half-Elf"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. vs. being charmed; Magic can't put me to sleep",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Elvish", 1],
+		vision : [["Darkvision", 60]],
+		savetxt : {
+			text : ["Magic can't put me to sleep"],
+			adv_vs : ["charmed"]
+		},
 		skillstxt : "Choose any two skills",
 		age : " reach adulthood around age 20 and often live over 180 years",
 		height : " range from 5 to 6 feet tall (4'9\" + 2d8\")",
@@ -985,7 +1076,7 @@ var RaceList = {
 		improvements : "Half-Elf: +2 Charisma and +1 to two other ability scores of my choice;",
 		scores : [0, 0, 0, 0, 0, 2],
 		trait : "Half-Elf (+2 Charisma and +1 to two other ability scores of my choice)\n\nSkill Versatility: I gain proficiency in two skills of my choice.",
-		variants : ["aquatic", "cantrip", "drow magic", "elf weapon training", "fleet of foot", "mask of the wild"],
+		variants : ["aquatic", "cantrip", "drow magic", "elf weapon training", "fleet of foot", "mask of the wild"]
 	},
 
 	"half-orc" : {
@@ -994,9 +1085,11 @@ var RaceList = {
 		source : ["P", 41],
 		plural : "Half-orcs",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Orc"],
-		vision : "Darkvision 60 ft",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Orc"],
+		vision : [["Darkvision", 60]],
 		skills : ["Intimidation"],
 		age : " reach adulthood around age 14 and rarely live longer than 75 years",
 		height : " range from 5 to well over 6 feet tall (4'10\" + 2d10\")",
@@ -1017,7 +1110,7 @@ var RaceList = {
 				name : "Savage Attacks",
 				minlevel : 1,
 				calcChanges : {
-					atkAdd : ["if (fields.Range.match(/melee/i)) {var pExtraCritM = extraCritM ? extraCritM : 0; var extraCritM = pExtraCritM + 1; if (pExtraCritM) {fields.Description.replace('+' + pExtraCritM + ' extra di', '+' + extraCritM + ' extra di'); } else {fields.Description += (fields.Description ? '; +' : '+') + extraCritM + ' extra die on a crit in melee'; }; fields.Description = extraCritM > 1 ? fields.Description.replace('extra die on a crit', 'extra dice on a crit') : fields.Description; };", "My melee attacks roll 1 additional dice on a critical hit."]
+					atkAdd : ["if (isMeleeWeapon && (/d\\d+/).test(fields.Damage_Die)) {var pExtraCritM = extraCritM ? extraCritM : 0; var extraCritM = pExtraCritM + 1; if (pExtraCritM) {fields.Description = fields.Description.replace(pExtraCritM + 'd', extraCritM + 'd'); } else {fields.Description += (fields.Description ? '; ' : '') + extraCritM + fields.Damage_Die.replace(/.*(d\\d+).*/, '$1') + ' extra on a crit in melee'; }; }; ", "My melee attacks roll 1 additional dice on a critical hit."]
 				}
 			}
 		},
@@ -1030,9 +1123,11 @@ var RaceList = {
 		source : ["V", 119],
 		plural : "Hobgoblins",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Goblin"],
-		vision : "Darkvision 60 ft",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Goblin"],
+		vision : [["Darkvision", 60]],
 		armor : [true, false, false, false],
 		age : " reach adulthood in their late teens and live less than 100 years",
 		height : " range from barely 5 to well over 6 feet tall (4'8\" + 2d10\")",
@@ -1040,15 +1135,15 @@ var RaceList = {
 		heightMetric : " range from barely 1,5 to well over 1,8 metres tall (145 + 5d10 cm)",
 		weightMetric : " weigh between 70 and 90 kg (50 + 5d10 \xD7 4d4 / 10 kg)",
 		improvements : "Hobgoblin: +2 Constitution, +1 Intelligence;",
-		scores : [0, 2, 1, 0, 0, 0],
+		scores : [0, 0, 2, 1, 0, 0],
 		features : {
 			"saving face" : {
 				name : "Saving Face",
 				minlevel : 1,
 				usages : 1,
 				recovery : "short rest",
-				tooltip : "",
-			},
+				tooltip : ""
+			}
 		},
 		trait : "Hobgoblin (+2 Constitution, +1 Intelligence)\n\nMartial Training: I am proficient with two martial weapons of my choice and light armor.\n\nSaving Face: Once per short rest, when I miss an attack roll or fail an ability check or a saving throw, I can gain a bonus to the roll equal to the number of allies I can see within 30 feet of me (max +5)."
 	},
@@ -1059,8 +1154,10 @@ var RaceList = {
 		source : ["P", 31],
 		plural : "Humans",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "+1 from Human"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", 1],
 		age : " reach adulthood in their late teens and live less than 100 years",
 		height : " range from barely 5 to well over 6 feet tall (4'8\" + 2d10\")",
 		weight : " weigh around 165 lb (110 + 2d10 \xD7 2d4 lb)",
@@ -1069,7 +1166,7 @@ var RaceList = {
 		improvements : "Human: +1 to all ability scores;",
 		scores : [1, 1, 1, 1, 1, 1],
 		trait : "Human (+1 to all ability scores)",
-		variants : ["variant"],
+		variants : ["variant"]
 	},
 
 	"kenku" : {
@@ -1078,9 +1175,11 @@ var RaceList = {
 		source : ["V", 109],
 		plural : "Kenku",
 		size : 3,
-		speed : [30, 20],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
 		skillstxt : "Choose two from Acrobatics, Deception, Stealth, and Sleight of Hand.",
-		languages : ["Common", "Auran"],
+		languageProfs : ["Common", "Auran"],
 		age : " reach maturity at about 12 years old and can live to 60",
 		height : " are around 5 feet tall (4'4\" + 2d8\")",
 		weight : " weigh between 90 and 120 lb (70 + 2d8 \xD7 1d4 lb)",
@@ -1088,7 +1187,7 @@ var RaceList = {
 		weightMetric : " weigh between 40 and 55 kg (35 + 5d8 \xD7 2d4 / 10 kg)",
 		improvements : "Kenku: +2 Dexterity, +1 Wisdom;",
 		scores : [0, 2, 0, 0, 1, 0],
-		trait : "Kenku (+2 Dexterity, +1 Wisdom)" + (typePF ? "\n" : "") + "\nExpert Forgery: Kenku can duplicate other creatures' handwriting and craftwork. I have advantage on all checks made to produce forgeries or duplicates of existing objects." + (typePF ? "\n" : "") + "\nMimicry: I can mimic any sounds I have heard, including voices, but can otherwise not speak. Creatures hearing these sounds can determine they are imitations with a successful Wisdom (Insight) check opposed by my Charisma (Deception).",
+		trait : "Kenku (+2 Dexterity, +1 Wisdom)" + (typePF ? "\n" : "") + "\nExpert Forgery: Kenku can duplicate other creatures' handwriting and craftwork. I have advantage on all checks made to produce forgeries or duplicates of existing objects." + (typePF ? "\n" : "") + "\nMimicry: I can mimic any sounds I have heard, including voices, but can otherwise not speak. Creatures hearing these sounds can determine they are imitations with a successful Wisdom (Insight) check opposed by my Charisma (Deception)."
 	},
 	
 	"kobold" : {
@@ -1097,9 +1196,11 @@ var RaceList = {
 		source : ["V", 119],
 		plural : "Kobolds",
 		size : 4,
-		speed : [30, 20],
-		languages : ["Common", "Draconic"],
-		vision : "Darkvision 60 ft; Sunlight Sensitivity",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Draconic"],
+		vision : [["Darkvision", 60], ["Sunlight Sensitivity", 0]],
 		age : " reach adulthood at age 6 and can live up to 120 years, but rarely do so",
 		height : " are between 2 and 3 feet tall (2'1\" + 2d4\")",
 		weight : " weigh between 25 and 35 lb (25 + 2d4 \xD7 1 lb)",
@@ -1114,8 +1215,8 @@ var RaceList = {
 				usages : 1,
 				recovery : "short rest",
 				tooltip : "",
-				action : ["action", ""],
-			},
+				action : ["action", ""]
+			}
 		},
 		trait : "Kobold (-2 Strength, +2 Dexterity)\nSunlight Sensitivity: Disadvantage on attack rolls and Wisdom (Perception) checks that rely on sight when I or what I am trying to attack/perceive is in direct sunlight.\nGrovel, Cower, and Beg: As an action, I can distract all foes within 10 feet of me that can see me so that my allies gain advantage on attack rolls against them.\nPack Tactics: I have advantage on attack rolls against creatures when at least one of my allies is within 5 feet of that creature and that ally is not incapacitated."
 	},
@@ -1126,9 +1227,13 @@ var RaceList = {
 		source : ["V", 111],
 		plural : "Lizardfolk",
 		size : 3,
-		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
+		speed : {
+			walk : { spd : 30, enc : 20 },
+			swim : { spd : 30, enc : 20 }
+		},
+//		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
 		skillstxt : "Choose two from Animal Handling, Nature, Perception, Stealth, and Survival.",
-		languages : ["Common", "Draconic"],
+		languageProfs : ["Common", "Draconic"],
 		weapons : ["bite"],
 		age : " reach maturity around age 14 and rarely live longer than 60 years",
 		height : " range from 5 to well over 6 feet tall (4'9\" + 2d10\")",
@@ -1143,7 +1248,7 @@ var RaceList = {
 				minlevel : 1,
 				usages : 1,
 				recovery : "short rest",
-				tooltip : "",
+				tooltip : ""
 			},
 			"hungry jaws" : {
 				name : "Hungry Jaws",
@@ -1152,9 +1257,9 @@ var RaceList = {
 				recovery : "short rest",
 				tooltip : "",
 				action : ["bonus action", ""]
-			},
+			}
 		},
-		trait : "Lizardfolk (+2 Constitution, +1 Wisdom) Bite: I can use my fanged maw to make unarmed strikes dealing 1d6 piercing damage." + (typePF ? "\n" : " ") + "Cunning Artisan: As part of a short rest I can harvest parts of a slain creature to make a shield, club, javelin, or 1d4 darts/blowgun needles. This requires a suitable corpse and appropriate tools." + (typePF ? "\n" : " ") + "Hold Breath: I can hold my breath for up to 15 minutes at a time." + (typePF ? "\n" : " ") + "Natural Armor: I have an AC of 13 + Dexterity modifier + shield." + (typePF ? "\n" : " ") + "Hungry Jaws: As a bonus action, once per short rest, I can make a special bite attack and if it hits I gain temporary HP equal to my Con modifier (min 1).",
+		trait : "Lizardfolk (+2 Constitution, +1 Wisdom) Bite: I can use my fanged maw to make unarmed strikes dealing 1d6 piercing damage." + (typePF ? "\n" : " ") + "Cunning Artisan: As part of a short rest I can harvest parts of a slain creature to make a shield, club, javelin, or 1d4 darts/blowgun needles. This requires a suitable corpse and appropriate tools." + (typePF ? "\n" : " ") + "Hold Breath: I can hold my breath for up to 15 minutes at a time." + (typePF ? "\n" : " ") + "Natural Armor: I have an AC of 13 + Dexterity modifier + shield." + (typePF ? "\n" : " ") + "Hungry Jaws: As a bonus action, once per short rest, I can make a special bite attack and if it hits I gain temporary HP equal to my Con modifier (min 1)."
 	},
 
 	"orc" : {
@@ -1163,9 +1268,11 @@ var RaceList = {
 		source : ["V", 120],
 		plural : "Orcs",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Orc"],
-		vision : "Darkvision 60 ft",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Orc"],
+		vision : [["Darkvision", 60]],
 		skills : ["Intimidation"],
 		age : " reach adulthood at age 12 and live up to 50 years",
 		height : " are usually over 6 feet tall (5'4\" + 2d8\")",
@@ -1178,24 +1285,28 @@ var RaceList = {
 			"aggressive" : {
 				name : "Aggressive",
 				minlevel : 1,
-				action : ["bonus action", " (dash to enemy)"],
+				action : ["bonus action", " (dash to enemy)"]
 			}
 		},
 		trait : "Orc (+2 Strength, +1 Constitution, -2 Intelligence)\n\nPowerful Build: I count as one size larger when determining my carrying capacity and the weight I can push, drag, or lift.\n\nAggressive: As a bonus action, I can move up to my speed toward an enemy that I can see or hear. I must end my move closer to this enemy than I started.",
-		eval : "tDoc.getField(\"Carrying Capacity Multiplier\").value *= 2;",
-		removeeval : "tDoc.getField(\"Carrying Capacity Multiplier\").value /= 2;"
+		eval : "tDoc.getField('Carrying Capacity Multiplier').value *= 2;",
+		removeeval : "tDoc.getField('Carrying Capacity Multiplier').value /= 2;"
 	},
 
 	"tabaxi" : {
 		regExpSearch : /tabaxi/i,
 		name : "Tabaxi",
-		source : ["V", 111],
+		source : ["V", 113],
 		plural : "Tabaxi",
 		size : 3,
-		speed : ["30 ft\n20 ft climb", "20 ft\n10 ft climb"],
+		speed : {
+			walk : { spd : 30, enc : 20 },
+			climb : { spd : 20, enc : 10 }
+		},
+//		speed : ["30 ft\n20 ft climb", "20 ft\n10 ft climb"],
 		skills : ["Perception", "Stealth"],
-		languages : ["Common", "+1 from Tabaxi"],
-		vision : "Darkvision 60 ft",
+		languageProfs : ["Common", 1],
+		vision : [["Darkvision", 60]],
 		weapons : ["cat's claws"],
 		age : " reach adulthood in their late teens and live less than 100 years",
 		height : " range from 5 to well over 6 feet tall (4'10\" + 2d10\")",
@@ -1211,10 +1322,10 @@ var RaceList = {
 				usages : 1,
 				recovery : " Turn",
 				additional : "still for 1 turn to recover",
-				tooltip : " (can be replenished by not moving for one whole turn)",
+				tooltip : " (can be replenished by not moving for one whole turn)"
 			}
 		},
-		trait : "Tabaxi (+2 Dexterity, +1 Charisma)\n\nCat's Claws: I can use my fanged claws to make unarmed strikes dealing 1d4 slashing damage. They also give me a climbing speed of 20 feet.\n\nFeline Agility: When moving on my turn in combat, I can move double my speed. Once I do this, I can't do it again until I don't move at all on one of my turns.",
+		trait : "Tabaxi (+2 Dexterity, +1 Charisma)\n\nCat's Claws: I can use my fanged claws to make unarmed strikes dealing 1d4 slashing damage. They also give me a climbing speed of 20 feet.\n\nFeline Agility: When moving on my turn in combat, I can move double my speed. Once I do this, I can't do it again until I don't move at all on one of my turns."
 	},
 
 	"tiefling" : {
@@ -1223,10 +1334,12 @@ var RaceList = {
 		source : ["P", 43],
 		plural : "Tieflings",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Infernal"],
-		vision : "Darkvision 60 ft",
-		dmgres : ["fire"],
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Infernal"],
+		vision : [["Darkvision", 60]],
+		dmgres : ["Fire"],
 		age : " reach adulthood in their late teens and live around 100 years",
 		height : " range from 5 to over 6 feet tall (4'9\" + 2d8\")",
 		weight : " weigh around 155 lb (110 + 2d8 \xD7 2d4 lb)",
@@ -1241,7 +1354,7 @@ var RaceList = {
 			name : "Infernal Legacy (level 1)",
 			spells : ["thaumaturgy"],
 			selection : ["thaumaturgy"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"hellish rebuke" : {
@@ -1256,8 +1369,8 @@ var RaceList = {
 					name : "Infernal Legacy (level 3)",
 					spells : ["hellish rebuke"],
 					selection : ["hellish rebuke"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"darkness" : {
 				name : "Darkness",
@@ -1270,11 +1383,11 @@ var RaceList = {
 					name : "Infernal Legacy (level 5)",
 					spells : ["darkness"],
 					selection : ["darkness"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		},
-		variants : ["feral", "devil's tongue", "hellfire", "winged"]
+		variants : ["devil's tongue", "hellfire", "winged"]
 	},
 
 	"triton" : {
@@ -1283,9 +1396,13 @@ var RaceList = {
 		source : ["V", 115],
 		plural : "Triton",
 		size : 3,
-		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
-		languages : ["Common", "Primordial"],
-		dmgres : ["cold"],
+		speed : {
+			walk : { spd : 30, enc : 20 },
+			swim : { spd : 30, enc : 20 }
+		},
+//		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
+		languageProfs : ["Common", "Primordial"],
+		dmgres : ["Cold"],
 		age : " reach maturity around age 15 and can live up to 200 years",
 		height : " are around 5 feet tall (4'6\" + 2d10\")",
 		weight : " weigh around 150 lb (90 + 2d10 \xD7 2d4 lb)",
@@ -1308,8 +1425,8 @@ var RaceList = {
 					name : "Control Air and Water (1)",
 					spells : ["fog cloud"],
 					selection : ["fog cloud"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"gust of wind" : {
 				name : "Gust of Wind",
@@ -1322,8 +1439,8 @@ var RaceList = {
 					name : "Control Air and Water (3)",
 					spells : ["gust of wind"],
 					selection : ["gust of wind"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"wall of water" : {
 				name : "Wall of Water",
@@ -1336,10 +1453,10 @@ var RaceList = {
 					name : "Control Air and Water (5)",
 					spells : ["wall of water"],
 					selection : ["wall of water"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
-		},
+		}
 	},
 
 	"yuan-ti pureblood" : {
@@ -1348,10 +1465,15 @@ var RaceList = {
 		source : ["V", 120],
 		plural : "Yuan-Ti Purebloods",
 		size : 3,
-		speed : [30, 20],
-		languages : ["Common", "Abyssal", "Draconic"],
-		vision : "Darkvision 60 ft",
-		savetxt : "Adv. on all saves vs. magic; Immune to poison damage and the poison condition",
+		speed : {
+			walk : { spd : 30, enc : 20 }
+		},
+		languageProfs : ["Common", "Abyssal", "Draconic"],
+		vision : [["Darkvision", 60]],
+		savetxt : {
+			immune : ["poison"],
+			adv_vs : ["magic"]
+		},
 		age : " reach adulthood in their late teens and live less than 100 years",
 		height : " range from barely 5 to well over 6 feet tall (4'8\" + 2d10\")",
 		weight : " weigh around 165 lb (110 + 2d10 \xD7 2d4 lb)",
@@ -1365,7 +1487,7 @@ var RaceList = {
 			name : "Innate Spellcasting (1)",
 			spells : ["poison spray"],
 			selection : ["poison spray"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"animal friendship" : {
@@ -1376,8 +1498,8 @@ var RaceList = {
 					name : "Innate Spellcasting (1)",
 					spells : ["animal friendship"],
 					selection : ["animal friendship"],
-					atwill : true,
-				},
+					atwill : true
+				}
 			},
 			"suggestion" : {
 				name : "Suggestion",
@@ -1390,11 +1512,11 @@ var RaceList = {
 					name : "Innate Spellcasting (3)",
 					spells : ["suggestion"],
 					selection : ["suggestion"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		},
-		trait : "Yuan-Ti Pureblood (+1 Intelligence, +2 Charisma)\n\nInnate Spellcasting:\n   I know the Poison Spray cantrip.\n   I can cast the spell Animal Friendship on snakes at will.\n   Once I reach 3rd level, I can cast the Suggestion spell once per long rest.\n   Charisma is my spellcasting ability for these spells.",
+		trait : "Yuan-Ti Pureblood (+1 Intelligence, +2 Charisma)\n\nInnate Spellcasting:\n   I know the Poison Spray cantrip.\n   I can cast the spell Animal Friendship on snakes at will.\n   Once I reach 3rd level, I can cast the Suggestion spell once per long rest.\n   Charisma is my spellcasting ability for these spells."
 	},
 }
 
@@ -1409,7 +1531,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 acid damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["acid"],
+		dmgres : ["Acid"]
 	},
 	
 	"dragonborn-blue" : {
@@ -1422,7 +1544,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 lightning damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["lightning"],
+		dmgres : ["Lightning"]
 	},
 	
 	"dragonborn-brass" : {
@@ -1435,7 +1557,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 fire damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["fire"],
+		dmgres : ["Fire"]
 	},
 	
 	"dragonborn-bronze" : {
@@ -1448,7 +1570,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 lightning damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["lightning"],
+		dmgres : ["Lightning"]
 	},
 	
 	"dragonborn-copper" : {
@@ -1461,7 +1583,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 acid damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["acid"],
+		dmgres : ["Acid"]
 	},
 	
 	"dragonborn-gold" : {
@@ -1474,7 +1596,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 fire damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["fire"],
+		dmgres : ["Fire"]
 	},
 	
 	"dragonborn-green" : {
@@ -1487,7 +1609,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 poison damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["poison"],
+		dmgres : ["Poison"]
 	},
 	
 	"dragonborn-red" : {
@@ -1500,7 +1622,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 fire damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["fire"],
+		dmgres : ["Fire"]
 	},
 	
 	"dragonborn-silver" : {
@@ -1513,7 +1635,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 cold damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["cold"],
+		dmgres : ["Cold"]
 	},
 	
 	"dragonborn-white" : {
@@ -1526,7 +1648,7 @@ var RaceSubList = {
 		+ "\n   " + "It does 2d6 cold damage, half as much damage on a successful save."
 		+ "\n   " + "The damage increases to 3d6 at level 6, 4d6 at level 11, and 5d6 at level 16."
 		+ "\n   " + "I can't use this feature again until I finish a short rest.",
-		dmgres : ["cold"],
+		dmgres : ["Cold"]
 	},
 
 	"half-elf-aquatic" : {
@@ -1534,9 +1656,13 @@ var RaceSubList = {
 		name : "Half-aquatic elf",
 		source : ["S", 116],
 		plural : "Half-aquatic elves",
-		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
+		speed : {
+			walk : { spd : 30, enc : 20 },
+			swim : { spd : 30, enc : 20 }
+		},
+//		speed : ["30 ft\n30 ft swim", "20 ft\n20 ft swim"],
 		skillstxt : "",
-		trait : "Half-Aquatic Elf (+2 Charisma and +1 to two other ability scores of my choice)\n\nSwimming Speed:\n   My aquatic heritage gives me a swimming speed of 30 feet.",
+		trait : "Half-Aquatic Elf (+2 Charisma and +1 to two other ability scores of my choice)\n\nSwimming Speed:\n   My aquatic heritage gives me a swimming speed of 30 feet."
 	},
 
 	"half-elf-cantrip" : {
@@ -1552,8 +1678,8 @@ var RaceSubList = {
 			name : "High Elf Cantrip",
 			class : "wizard",
 			level : [0, 0],
-			atwill : true,
-		},
+			atwill : true
+		}
 	},
 
 	"half-elf-drow magic" : {
@@ -1569,7 +1695,7 @@ var RaceSubList = {
 			name : "Drow Magic (level 1)",
 			spells : ["dancing lights"],
 			selection : ["dancing lights"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"faerie fire" : {
@@ -1583,8 +1709,8 @@ var RaceSubList = {
 					name : "Drow Magic (level 3)",
 					spells : ["faerie fire"],
 					selection : ["faerie fire"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"darkness" : {
 				name : "Darkness",
@@ -1597,8 +1723,8 @@ var RaceSubList = {
 					name : "Drow Magic (level 5)",
 					spells : ["darkness"],
 					selection : ["darkness"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
 		}
 	},
@@ -1608,9 +1734,11 @@ var RaceSubList = {
 		name : "Half-wood elf",
 		source : ["S", 116],
 		plural : "Half-wood elves",
-		speed : [35, 25],
+		speed : {
+			walk : { spd : 35, enc : 25 }
+		},
 		skillstxt : "",
-		trait : "Half-Wood Elf (+2 Charisma and +1 to two other ability scores of my choice)",
+		trait : "Half-Wood Elf (+2 Charisma and +1 to two other ability scores of my choice)"
 	},
 	
 	"half-elf-elf weapon training" : {
@@ -1618,7 +1746,7 @@ var RaceSubList = {
 		source : ["S", 116],
 		skillstxt : "",
 		trait : "Half-Elf (+2 Charisma and +1 to two other ability scores of my choice)",
-		weaponprofs : [false, false, ["longsword", "shortsword", "longbow", "shortbow"]],
+		weaponprofs : [false, false, ["longsword", "shortsword", "longbow", "shortbow"]]
 	},
 
 	"half-elf-mask of the wild" : {
@@ -1627,7 +1755,7 @@ var RaceSubList = {
 		source : ["S", 116],
 		plural : "Half-wood elves",
 		skillstxt : "",
-		trait : "Half-Wood Elf (+2 Charisma and +1 to two other ability scores of my choice)\n\nMask of the Wild:\n   I can attempt to hide even when I am only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena.",
+		trait : "Half-Wood Elf (+2 Charisma and +1 to two other ability scores of my choice)\n\nMask of the Wild:\n   I can attempt to hide even when I am only lightly obscured by foliage, heavy rain, falling snow, mist, and other natural phenomena."
 	},
 
 	"human-variant" : {
@@ -1636,18 +1764,8 @@ var RaceSubList = {
 		improvements : "Human: +1 to two different ability scores of my choice;",
 		scores : [0, 0, 0, 0, 0, 0],
 		trait : "Human (+1 to two different ability scores of my choice)\n\nSkills: I gain proficiency in one skill of my choice.\n\nFeat: I gain one feat of my choice.",
-		eval : "AddString(\"Feat Note 1\", \"Human bonus feat\", \";\");",
-		removeeval : "RemoveString(\"Feat Note 1\", \"Human bonus feat\");"
-	},
-
-	"tiefling-feral" : {
-		regExpSearch : /feral/i,
-		name : "Feral tiefling",
-		source : ["S", 118],
-		plural : "Feral tieflings",
-		improvements : "Feral Tiefling: +2 Dexterity, +1 Intelligence;",
-		scores : [0, 2, 0, 1, 0, 0],
-		trait : "Feral Tiefling (+2 Dexterity, +1 Intelligence)\n\nInfernal Legacy:\n   I know the Thaumaturgy cantrip.\n   At 3rd level, I can cast the Hellish Rebuke spell once per long rest as a 2nd-level spell.\n   At 5th level, I can also cast the Darkness spell once per long rest.\n   Charisma is my spellcasting ability for these spells.",
+		eval : "AddString('Feat Note 1', 'Human bonus feat', '; ');",
+		removeeval : "RemoveString('Feat Note 1', 'Human bonus feat');"
 	},
 
 	"tiefling-devil's tongue" : {
@@ -1660,7 +1778,7 @@ var RaceSubList = {
 			name : "Devil's Tongue (level 1)",
 			spells : ["vicious mockery"],
 			selection : ["vicious mockery"],
-			atwill : true,
+			atwill : true
 		},
 		features : {
 			"charm person" : {
@@ -1675,8 +1793,8 @@ var RaceSubList = {
 					name : "Devil's Tongue (level 3)",
 					spells : ["charm person"],
 					selection : ["charm person"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"enthrall" : {
 				name : "Enthrall",
@@ -1689,10 +1807,10 @@ var RaceSubList = {
 					name : "Devil's Tongue (level 5)",
 					spells : ["enthrall"],
 					selection : ["enthrall"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
-		},
+		}
 	},
 
 	"tiefling-hellfire" : {
@@ -1714,8 +1832,8 @@ var RaceSubList = {
 					name : "Hellfire Legacy (level 3)",
 					spells : ["burning hands"],
 					selection : ["burning hands"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			},
 			"darkness" : {
 				name : "Darkness",
@@ -1728,10 +1846,10 @@ var RaceSubList = {
 					name : "Infernal Legacy (level 5)",
 					spells : ["darkness"],
 					selection : ["darkness"],
-					oncelr : true,
-				},
+					oncelr : true
+				}
 			}
-		},
+		}
 	},
 
 	"tiefling-winged" : {
@@ -1739,11 +1857,15 @@ var RaceSubList = {
 		name : "Winged tiefling",
 		source : ["S", 118],
 		plural : "Winged tieflings",
-		speed : ["30 ft\n30 ft fly", "20 ft\n20 ft fly"],
+		speed : {
+			walk : { spd : 30, enc : 20 },
+			fly : { spd : 30, enc : 20 }
+		},
+//		speed : ["30 ft\n30 ft fly", "20 ft\n20 ft fly"],
 		trait : "Winged Tiefling (+1 Intelligence, +2 Charisma)\n\nWings:\n   I have bat-like wings sprouting from my shoulder blades that give me flying speed of 30 feet.",
 		features : "",
 		abilitySave : 0,
 		spellcastingAbility : "",
-		spellcastingBonus : "",
+		spellcastingBonus : ""
 	},
 }

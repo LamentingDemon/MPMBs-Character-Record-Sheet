@@ -14,7 +14,7 @@
 				This bloodline is made by Cain
 				For more details, download the full text for this bloodline here: http://bit.ly/2kjur6M
     Code by:    Cain
-    Date:       2017-01-25 (sheet v12.81)
+    Date:		2017-09-22 (sheet v12.998)
 */
 
 ClassSubList["blood of the primordials"] = {
@@ -52,8 +52,7 @@ ClassSubList["blood of the primordials"] = {
 				eval : "var ToAdd = [\"sorcerer\", \"subclassfeature6\", \"fire\"]; if (classes.known.sorcerer.level >= 6 && tDoc.getField(\"Class Features Remember\").value.indexOf(ToAdd.slice(0,3).toString()) === -1) {ClassFeatureOptions(ToAdd)};",
 				primordialElement : "fire"
 			},
-			eval : "AddLanguage(\"Primordial\", \"being a Sorcerer (Primordial Bloodline)\");",
-			removeeval : "RemoveLanguage(\"Primordial\", \"being a Sorcerer (Primordial Bloodline)\");"
+			languageProfs : ["Primordial"]
 		},
 		"subclassfeature1.1" : {
 			name : "Primordial Resilience",
@@ -85,14 +84,15 @@ ClassSubList["blood of the primordials"] = {
 				name : "Lightning Elemental Affinity",
 				description : " [1 sorcery point]" + "\n   " + "I add my Charisma modifier to one damage roll of a spell if it does lightning damage" + "\n   " + "When I do this, I can spend 1 sorcery point to gain lightning resistance for 1 hour"
 			},
-			eval : "if (FeaChoice === \"\") {var CFrem = What(\"Class Features Remember\"); var tReg = /.*?sorcerer,subclassfeature1,(akadi|grumbar|istishia|kossuth).*/i; if (CFrem.match(tReg)) {FeaChoice = CurrentClasses.sorcerer.features.subclassfeature1[CFrem.replace(tReg, \"$1\")].primordialElement; AddString(\"Class Features Remember\", \"sorcerer,subclassfeature6,\" + FeaChoice, false);};};",
+			eval : "if (FeaChoice === \"\") {var CFrem = What(\"Class Features Remember\"); var tReg = /.*?sorcerer,subclassfeature1,(akadi|grumbar|istishia|kossuth).*/i; if ((tReg).test(CFrem)) {FeaChoice = CurrentClasses.sorcerer.features.subclassfeature1[CFrem.replace(tReg, \"$1\")].primordialElement; AddString(\"Class Features Remember\", \"sorcerer,subclassfeature6,\" + FeaChoice, false);};};",
 		},
 		"subclassfeature14" : {
 			name : "Elemental Wings",
 			source : ["HB", 0],
 			minlevel : 14,
 			description : "\n   " + "As a bonus action, unless armor is in the way, I can sprout elemental wings from my back"  + "\n   " + "They are magical and are not affected by the environment" + "\n   " + "I gain a fly speed equal to my current speed until I dismiss the wings as a bonus action",
-			action : ["bonus action", " (start/stop)"]
+			action : ["bonus action", " (start/stop)"],
+			speed : { fly : { spd : "walk", enc : "walk" } }
 		},
 		"subclassfeature18" : {
 			name : "Presence of the Dawn Titans",

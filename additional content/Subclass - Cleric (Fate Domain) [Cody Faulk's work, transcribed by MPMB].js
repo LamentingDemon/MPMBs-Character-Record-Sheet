@@ -13,7 +13,7 @@
 				This is taken from the DMs Guild website (http://www.dmsguild.com/product/194789/)
 				This subclass is made by Cody Faulk
 	Code by:	MorePurpleMoreBetter
-	Date:		2016-12-14 (sheet v12.71)
+	Date:		2017-06-03 (sheet v12.992)
 	
 	Please support the creator of this content (Cody Faulk) and download his material from the DMs Guild website: http://www.dmsguild.com/browse.php?author=Cody%20Faulk
 */
@@ -38,8 +38,7 @@ ClassSubList["fate domain"] = {
 				spells : ["resistance"],
 				selection : ["resistance"],
 			}],
-			eval : "if (!What(\"Init Bonus\")) {Value(\"Init Bonus\", \"Wis\")}",
-			removeeval : "if (What(\"Init Bonus\") === \"Wis\") {Value(\"Init Bonus\", \"\")}"
+			addMod : { type : "skill", field : "Init", mod : "Wis", text : "I add my Wisdom modifier to my initiative rolls." }
 		},
 		"subclassfeature2" : {
 			name : "Channel Divinity: Pierce the Veil",
@@ -59,8 +58,9 @@ ClassSubList["fate domain"] = {
 			name : "Potent Spellcasting",
 			source : ["CF:FD", 0],
 			minlevel : 8,
-			description : "\n   " + "I can add my Wisdom modifier to the damage I deal with my cleric cantrips",
-			eval : "for (var xy = 0; xy < CurrentWeapons.known.length; xy++) { if (CurrentWeapons.known[xy][099] && WeaponsList[CurrentWeapons.known[xy][0]].type === \"Cantrip\") { Value(\"Attack \" + (xy + 1) + \" Damage Bonus\", \"Wis\"); }}"
+			calcChanges : {
+				atkCalc : ["if (classes.known.cleric && classes.known.cleric.level > 7 && thisWeapon[4].indexOf('cleric') !== -1 && thisWeapon[3] && SpellsList[thisWeapon[3]].level === 0) { output.extraDmg += What('Wis Mod'); }; ", "My cleric cantrips get my Wisdom modifier added to their damage."]
+			}
 		},
 		"subclassfeature17" : {
 			name : "Greater Portent",

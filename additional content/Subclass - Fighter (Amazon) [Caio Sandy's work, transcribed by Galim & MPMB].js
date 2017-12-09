@@ -13,7 +13,7 @@
 				This is taken from the DMs Guild website (http://www.dmsguild.com/product/171865/)
 				This subclass is made by Caio Sandy
 	Code by:	Galim & MorePurpleMoreBetter
-	Date:		2017-02-15 (sheet v12.83)
+	Date:		2017-09-22 (sheet v12.998)
 
 	Please support the creator of this content (Caio Sandy) and download his material from the DMs Guild website: http://www.dmsguild.com/browse.php?x=0&y=0&author=Caio%20Sandy
 */
@@ -43,7 +43,7 @@ ClassSubList["amazon"] = {
 				name : "Amazon Skill: Archery",
 				description : "\n   " + "+2 bonus to attack rolls I make with ranged weapons",
 				calcChanges : {
-					atkCalc : ["if (!fields.Range.match(/melee/i) && !WeaponText.match(/spell|cantrip/i) && (!theWea || !theWea.type.match(/cantrip|spell/i))) {output.extraHit += 2; }; ", "My ranged weapons get a +2 bonus on the To Hit."]
+					atkCalc : ["if (isRangedWeapon) {output.extraHit += 2; }; ", "My ranged weapons get a +2 bonus on the To Hit."]
 				}
 			},
 			"fighting style: defense" : {
@@ -58,7 +58,7 @@ ClassSubList["amazon"] = {
 				source : ["P", 72],
 				description : "\n   " + "+2 to damage rolls when wielding a melee weapon in one hand and no other weapons",
 				calcChanges : {
-					atkCalc : ["var areOffHands = function(n){for(var i=1;i<=n;i++){if (What('Bonus Action ' + i).match(/off.hand.attack/i)) {return true; }; }; }(FieldNumbers.actions); if (!areOffHands && fields.Range.match(/melee/i) && !theWea.description.match(/\\b(2|two).?hand(ed)?s?\\b/i)) {output.extraDmg += 2; }; ", "When I'm wielding a melee weapon in one hand and no weapon in my other hand, I do +2 damage with that melee weapon. This condition will always be false if the bonus action 'Off-hand Attack' exists."]
+					atkCalc : ["var areOffHands = function(n){for(var i=1;i<=n;i++){if ((/off.hand.attack/i).test(What('Bonus Action ' + i))) {return true; }; }; }(FieldNumbers.actions); if (!areOffHands && isMeleeWeapon && !(/\\b(2|two).?hand(ed)?s?\\b/i).test(theWea.description)) {output.extraDmg += 2; }; ", "When I'm wielding a melee weapon in one hand and no weapon in my other hand, I do +2 damage with that melee weapon. This condition will always be false if the bonus action 'Off-hand Attack' exists."]
 				}
 			},
 			"fighting style: great weapon fighting" : {
@@ -66,7 +66,7 @@ ClassSubList["amazon"] = {
 				source : ["P", 72],
 				description : "\n   " + "Reroll 1 or 2 on damage if wielding two-handed/versatile melee weapon in both hands",
 				calcChanges : {
-					atkAdd : ["if (fields.Range.match(/melee/i) && fields.Description.match(/\\b(versatile|(2|two).?hand(ed)?s?)\\b/i)) {fields.Description += '; Re-roll 1 or 2 on damage die' + (fields.Description.match(/versatile/i) ? ' when two-handed' : ''); }; ", "While wielding a two-handed or versatile melee weapon in two hands, I can re-roll a 1 or 2 on any damage die once."]
+					atkAdd : ["if (isMeleeWeapon && (/\\b(versatile|(2|two).?hand(ed)?s?)\\b/i).test(theWea.description)) {fields.Description += (fields.Description ? '; ' : '') + 'Re-roll 1 or 2 on damage die' + ((/versatile/i).test(fields.Description) ? ' when two-handed' : ''); }; ", "While wielding a two-handed or versatile melee weapon in two hands, I can re-roll a 1 or 2 on any damage die once."]
 				}
 			},
 			"fighting style: protection" : {
@@ -86,7 +86,11 @@ ClassSubList["amazon"] = {
 			"fighting style: mariner" : {
 				name : "Amazon Skill: Mariner",
 				source : ["UA:WA", 3],
-				description : "\n   " + "While not wearing heavy armor or using a shield, I gain +1 AC and swim/climb speed" + "\n   " + "The swimming and climbing speeds equal my current walking speed",
+				description : "\n   " + "While not wearing heavy armor or using a shield, I gain +1 AC and swim/climb speed" + "\n   " + "The swimming and climbing speeds are equal to my current walking speed",
+				speed : {
+					climb : { spd : "walk", enc : "walk" },
+					swim : { spd : "walk", enc : "walk" }
+				},
 				eval : "AddACMisc(1, \"Mariner Fighting Style\", \"When not wearing heavy armor or using a shield, the class feature Mariner Fighting Style gives a +1 bonus to AC\", \"ACshield || tDoc.getField('Heavy Armor').isBoxChecked(0)\")",
 				removeeval : "AddACMisc(0, \"Mariner Fighting Style\", \"When not wearing heavy armor or using a shield, the class feature Mariner Fighting Style gives a +1 bonus to AC\")"
 			},
@@ -95,7 +99,7 @@ ClassSubList["amazon"] = {
 				source : ["UA:LDU", 1],
 				description : "\n   " + "+1 bonus to attack rolls I make with ranged attacks" + "\n   " + "I don't have disadvantage when making a ranged attack while within 5 ft of a hostile" + "\n   " + "My ranged attacks ignore half and three-quarters cover against targets within 30 ft",
 				calcChanges : {
-					atkCalc : ["if (!fields.Range.match(/melee/i) && !WeaponText.match(/spell|cantrip/i) && (!theWea || !theWea.type.match(/cantrip|spell/i))) {output.extraHit += 1; }; ", "My ranged weapons get a +1 bonus on the To Hit."]
+					atkCalc : ["if (isRangedWeapon) {output.extraHit += 1; }; ", "My ranged weapons get a +1 bonus on the To Hit."]
 				}
 			},
 			"fighting style: tunnel fighter" : {
@@ -143,7 +147,7 @@ ClassSubList["amazon"] = {
 				name : "Additional Amazon Skill: Archery",
 				description : "\n   " + "+2 bonus to attack rolls I make with ranged weapons",
 				calcChanges : {
-					atkCalc : ["if (!fields.Range.match(/melee/i) && !WeaponText.match(/spell|cantrip/i) && (!theWea || !theWea.type.match(/cantrip|spell/i))) {output.extraHit += 2; }; ", "My ranged weapons get a +2 bonus on the To Hit."]
+					atkCalc : ["if (isRangedWeapon) {output.extraHit += 2; }; ", "My ranged weapons get a +2 bonus on the To Hit."]
 				}
 			},
 			"fighting style: defense" : {
@@ -158,7 +162,7 @@ ClassSubList["amazon"] = {
 				source : ["P", 72],
 				description : "\n   " + "+2 to damage rolls when wielding a melee weapon in one hand and no other weapons",
 				calcChanges : {
-					atkCalc : ["var areOffHands = function(n){for(var i=1;i<=n;i++){if (What('Bonus Action ' + i).match(/off.hand.attack/i)) {return true; }; }; }(FieldNumbers.actions); if (!areOffHands && fields.Range.match(/melee/i) && !theWea.description.match(/\\b(2|two).?hand(ed)?s?\\b/i)) {output.extraDmg += 2; }; ", "When I'm wielding a melee weapon in one hand and no weapon in my other hand, I do +2 damage with that melee weapon. This condition will always be false if the bonus action 'Off-hand Attack' exists."]
+					atkCalc : ["var areOffHands = function(n){for(var i=1;i<=n;i++){if ((/off.hand.attack/i).test(What('Bonus Action ' + i))) {return true; }; }; }(FieldNumbers.actions); if (!areOffHands && isMeleeWeapon && !(/\\b(2|two).?hand(ed)?s?\\b/i).test(theWea.description)) {output.extraDmg += 2; }; ", "When I'm wielding a melee weapon in one hand and no weapon in my other hand, I do +2 damage with that melee weapon. This condition will always be false if the bonus action 'Off-hand Attack' exists."]
 				}
 			},
 			"fighting style: great weapon fighting" : {
@@ -166,7 +170,7 @@ ClassSubList["amazon"] = {
 				source : ["P", 72],
 				description : "\n   " + "Reroll 1 or 2 on damage if wielding two-handed/versatile melee weapon in both hands",
 				calcChanges : {
-					atkAdd : ["if (fields.Range.match(/melee/i) && fields.Description.match(/\\b(versatile|(2|two).?hand(ed)?s?)\\b/i)) {fields.Description += '; Re-roll 1 or 2 on damage die' + (fields.Description.match(/versatile/i) ? ' when two-handed' : ''); }; ", "While wielding a two-handed or versatile melee weapon in two hands, I can re-roll a 1 or 2 on any damage die once."]
+					atkAdd : ["if (isMeleeWeapon && (/\\b(versatile|(2|two).?hand(ed)?s?)\\b/i).test(theWea.description)) {fields.Description += (fields.Description ? '; ' : '') + 'Re-roll 1 or 2 on damage die' + ((/versatile/i).test(fields.Description) ? ' when two-handed' : ''); }; ", "While wielding a two-handed or versatile melee weapon in two hands, I can re-roll a 1 or 2 on any damage die once."]
 				}
 			},
 			"fighting style: protection" : {
@@ -186,7 +190,11 @@ ClassSubList["amazon"] = {
 			"fighting style: mariner" : {
 				name : "Additional Amazon Skill: Mariner",
 				source : ["UA:WA", 3],
-				description : "\n   " + "While not wearing heavy armor or using a shield, I gain +1 AC and swim/climb speed" + "\n   " + "The swimming and climbing speeds equal my current walking speed",
+				description : "\n   " + "While not wearing heavy armor or using a shield, I gain +1 AC and swim/climb speed" + "\n   " + "The swimming and climbing speeds are equal to my current walking speed",
+				speed : {
+					climb : { spd : "walk", enc : "walk" },
+					swim : { spd : "walk", enc : "walk" }
+				},
 				eval : "AddACMisc(1, \"Mariner Fighting Style\", \"When not wearing heavy armor or using a shield, the class feature Mariner Fighting Style gives a +1 bonus to AC\", \"ACshield || tDoc.getField('Heavy Armor').isBoxChecked(0)\")",
 				removeeval : "AddACMisc(0, \"Mariner Fighting Style\", \"When not wearing heavy armor or using a shield, the class feature Mariner Fighting Style gives a +1 bonus to AC\")"
 			},
@@ -195,7 +203,7 @@ ClassSubList["amazon"] = {
 				source : ["UA:LDU", 1],
 				description : "\n   " + "+1 bonus to attack rolls I make with ranged attacks" + "\n   " + "I don't have disadvantage when making a ranged attack while within 5 ft of a hostile" + "\n   " + "My ranged attacks ignore half and three-quarters cover against targets within 30 ft",
 				calcChanges : {
-					atkCalc : ["if (!fields.Range.match(/melee/i) && !WeaponText.match(/spell|cantrip/i) && (!theWea || !theWea.type.match(/cantrip|spell/i))) {output.extraHit += 1; }; ", "My ranged weapons get a +1 bonus on the To Hit."]
+					atkCalc : ["if (isRangedWeapon) {output.extraHit += 1; }; ", "My ranged weapons get a +1 bonus on the To Hit."]
 				}
 			},
 			"fighting style: tunnel fighter" : {

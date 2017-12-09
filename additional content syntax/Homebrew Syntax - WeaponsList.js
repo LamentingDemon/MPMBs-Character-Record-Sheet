@@ -10,7 +10,7 @@
 /*	-INFORMATION-
 	Subject:	Weapon / Attack
 	Effect:		This is the syntax for adding a new type of weapon, cantrip, or anything else you want to add to the attack section's automation
-	Sheet:		v12.83 (2017-02-15)
+	Sheet:		v12.998 (2017-09-15)
 */
 
 WeaponsList["leattack"] = { //Object name; Note the use of only lower case! Also note the absence of the word "var" and the use of brackets []
@@ -19,9 +19,13 @@ WeaponsList["leattack"] = { //Object name; Note the use of only lower case! Also
 	
 	name : "LeAttack", // Required; name of the weapon
 	
+	source : ["HB", 0], //required; the source and the page number. "HB" stands for homebrew. See the "Complete SourceList" for an overview of sources that are already defined. Or define a new source using the "Homebrew Syntax - SourceList.js". // This can be an array of arrays to indicate the things appears in multiple sources. For example, if something appears on page 7 of the Elemental Evil Player's Companion and on page 115 of the Sword Coast Adventure Guide, use the following: [["E", 7], ["S", 115]]
+	
+	list : "spell", //optional; by having this attribute, the attack will appear in the dropdown fields. It will be grouped according to what you enter. The lists of weapons in the sheet are: "melee", "ranged", "spell", and "improvised" // However, you can define your own groupings. These will always appear below all the weapons that are included in the sheet
+	
 	ability : 1, // Required; the ability score used to calculate the to hit modifier (and the damage if applicable, see below). [Str=1, Dex=2, Con=3, Int=4, Wis=5, Cha=6]
 	
-	type : "Simple", // Required; the type of the weapon. Alternatives are "Cantrip", "Martial", "Natural" (= always proficient), "Other", or "Spell" // Alternatively, you can define a type yourself. If this type matches a word in the 'Other Weapon Proficiencies' field, the character will be considered proficient with the weapon
+	type : "Simple", // Required; the type of the weapon. Alternatives are "Cantrip", "Martial", "Natural" (= always proficient), "Other", "Spell", or "Improvised Weapons" // Alternatively, you can define a type yourself. If this type matches a word in the 'Other Weapon Proficiencies' field, the character will be considered proficient with the weapon
 	
 	damage : [2, 4, "piercing"], // Required; the damage it does. First entry is the amount of dice, second is the type of dice, and third is the damage type. This example is 2d4 worth of piercing damage. //if you want the amount of dice to be an amount determined by the Character Level, then put "C" as the first value. Alternatively, you can use "B" for the value minus 1 (such as with Green-Flame Blade)
 	
@@ -44,5 +48,4 @@ WeaponsList["leattack"] = { //Object name; Note the use of only lower case! Also
 	SpellsList : "eldritch blast", // Optional; if the attack you are making is a spell/cantrip that is listed in the SpellsList variable under another name that you are using for this weapon (in this example it would be "leattack"), write the name used in the SpellsList variable here
 }
 
-UpdateDropdown("weapon", ["leattack"]); // Optional; This updates all attack dropdown fields; Note that you have to provide the name of your attack exactly the same as it is in the first line above, the object name.
-// If you are planning on adding multiple weapons to the sheet, only use the UpdateDropdown once or else you will get duplicates. You can make an array of the names of the attacks you want to have added to the lists.
+UpdateDropdown("weapon"); // Optional; This updates all attack dropdown fields with weapons that have a 'list' attribute

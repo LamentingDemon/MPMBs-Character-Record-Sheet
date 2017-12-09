@@ -11,7 +11,7 @@
 	Subject:	Class
 	Effect:		This is the syntax for adding a new class to the sheet
 				Note that you will need the syntax for adding a subclass as well if you want the class to have any choices for subclasses
-	Sheet:		v12.83 (2017-02-15)
+	Sheet:		v12.998 (2017-09-22)
 */
 
 ClassList["myclass"] = { //Object name; Note the use of only lower case! Also note the absence of the word "var" and the use of brackets []
@@ -20,7 +20,7 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 	
 	name : "MyClass", //required; the name to use for the class
 	
-	source : ["HB", 0], //required; the source and the page number. "HB" stands for homebrew. See the "Complete SourceList" for an overview of sources that are already defined. Or define a new source using the "Homebrew Syntax - SourceList.js"
+	source : ["HB", 0], //required; the source and the page number. "HB" stands for homebrew. See the "Complete SourceList" for an overview of sources that are already defined. Or define a new source using the "Homebrew Syntax - SourceList.js". // This can be an array of arrays to indicate the things appears in multiple sources. For example, if something appears on page 7 of the Elemental Evil Player's Companion and on page 115 of the Sword Coast Adventure Guide, use the following: [["E", 7], ["S", 115]]
 	
 	primaryAbility : "\n \u2022 MyClass: Dexterity;", //required; the text to display when citing the primary ability of the class
 	
@@ -33,8 +33,12 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 	saves : ["Str", "Con"], //required; the two save proficiencies.
 	
 	skills : ["\n\n" + toUni("MyClass") + ": Choose two from Acrobatics, Animal Handling, Athletics, History, Insight, Intimidation, Perception, and Survival.", "\n\n" + toUni("MyClass") + ": Choose one from Athletics, Intimidation, Perception, and Survival."], //required; the text to display for skill proficiencies. Note the \n\n at the start, they are important! The first entry is for when the class is the primary class, the second entry is for when the class is taken later as part of a multiclass
-	
-	tools : ["Three musical instruments", "One musical instrument"], //optional; tool proficiencies the class gives. The first entry is for when the class is the primary class, the second entry is for when the class is taken later as part of a multiclass. If the class doesn't give any tool proficiencies, you can delete this line
+
+/* SYNTAX CHANGE v12.998 >> old syntax for 'tools' and 'languages' are no longer supported!! */
+	toolProfs : { // optional; this is an object with arrays with the tool proficiencies gained. Each entry in an array can be its own array of 2 entries. The first entry is the name of the tool and the second entry is either 1) a number if the tool is yet to be chosen, or 2) the 3-letter ability score abbreviation if the tool is to be listed in the skill section and have a bonus calculated
+		primary : [["Musical instrument", 3], ["Thieves' tools", "Dex"]], // optional; the tool proficiencies gained if the class is the primary class (i.e. taken at 1st level)
+		secondary : [["Musical instrument", 1]] // optional; the tool proficiencies gained if the class is not the primary class (i.e. taken at a later level)
+	},
 	
 	armor : [ //required; the 4 entries are for: ["light", "medium", "heavy", "shields"]
 		[true, true, true, true], //required; the armor proficiencies if this is the first or only class
@@ -49,6 +53,8 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 	equipment : "MyClass starting equipment:\n \u2022 Chain mail -or- leather armor, a longbow, and 20 arrows;\n \u2022 A martial weapon and a shield -or- two martial weapons;\n \u2022 A light crossbow and 20 bolts -or- two handaxes;\n \u2022 A dungeoneer's pack -or- an explorer's pack.\n\nAlternatively, choose 5d4 \xD7 10 gp worth of starting equipment instead of both the class' and the background's starting equipment.", //required; the text to display when citing the starting equipment
 	
 	subclasses : ["Martial Archetype", ["champion", "battle master", "eldritch knight", "purple dragon knight"]], //required; the names of the subclasses. The first entry is the overal name that is given to the subclasses, the second entry is a list of the subclass, using the exact names of the entry of the subclasses in the ClassSubList. //Note that if one of the entries in the array of subclasses doesn't exist in the ClassSubList, the sheet will throw an error as soon as you make a character with levels in this class
+	
+	prestigeClassPrereq : 5, //optional; if you include this attribute, the sheet will consider the class a prestige class // You can make this attribute a number, which represents the levels the character must have before being able to gain the prestige class. Alternatively, you can make this attribute a string, which can be evaluated with eval() and returns either true (prereqs met) or false (prereqs not met).
 	
 	attacks : [1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3], //required; the amount of attacks at each level. Note that there are 20 entries, one for each level.
 	
@@ -105,6 +111,8 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 		ritual : false, //Optional; Denotes if only ritual (true) or only non-ritual (false) spells should be included in the list
 		
 		spells : ["light", "mending"], //Optional; If a "spells" array is present, all other objects will be ignored and only this list of spells will populate the list of available spells. each entry has to match the name of the spell in the SpellsList
+		
+		notspells : ["antipathy/sympathy", "tsunami"], //Optional; Any spells listed in this array will be excluded from the list
 	},
 	
 	spellcastingExtra : ["detect magic", "magic missile", "magic weapon", "nystul's magic aura", "dispel magic", "magic circle", "arcane eye", "leomund's secret chest", "planar binding", "teleportation circle"], //Optional; An array of spells that are added to the spell list from which the class can choose. If the class prepares spells, than this list of spells are always considered prepared. Each entry has to match the name of the entry of the spell in the SpellsList exactly
@@ -151,19 +159,25 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 					
 					atkCalc : ["if (isOffHand) {output.modToDmg = true; }; ", "When engaging in two-weapon fighting, I can add my ability modifier to the damage of my off-hand attacks."], //optional; change something in the calculation of the Damage and To Hit of attacks; The first value in the array is stringified code that is run using eval(), the second entry is an explanation of what is being altered so that it can be displayed in a dialogue. This second entry can be left empty, as ""
 					
-					atkAdd : ["if (WeaponName.match(/unarmed strike/i)) {fields.Description += 'Counts as magical';}; ", "My unarmed strikes count as magical for overcoming resistances and immunities."], //optional; works just like atkDmg, but affects the weapon attributes when they are applied to the sheet. With this you can change the weapon's description, range, damage die, attribute, etc. etc.
+					atkAdd : ["if (WeaponName.match(/unarmed strike/i)) {fields.Description += 'Counts as magical';}; ", "My unarmed strikes count as magical for overcoming resistances and immunities."], //optional; works just like atkDmg, but affects the weapon attributes when they are applied to the sheet. With this you can change the weapon's description, range, damage die, attribute, etc. etc. However, this will only be applied to recognized weapons
 					
+						// Note that you need to use two back slashes for things in the eval code here, because it is first added to a string, and then run as code. See the hp for an example, with the \\n
+						
 						// For the eval strings for the attack calculations ('atkCalc' or 'atkAdd') there are some variables that you can use to test against:
 							
-							// The variable WeaponName contains the recognized weapon object name as it is used in the WeaponsList object (or "" if the weapon is not a recognized weapon);
+							// The variable WeaponName contains the recognized weapon object name as it is used in the WeaponsList object (or "" in atkCalc if the weapon is not a recognized weapon);
 						
-							// The object "theWea" is the WeaponsList[WeaponName] object for the recognized weapon (or 'undefined' if the weapon is not a recognized weapon);
+							// The object "theWea" is the WeaponsList[WeaponName] object for the recognized weapon (or 'undefined' in atkCalc if the weapon is not a recognized weapon);
+							
+							// You can use the booleans 'isOffHand', 'isMeleeWeapon', 'isRangedWeapon', 'isSpell' (also true for cantrips), 'isDC'
+							
+							// If the attack is a spell that is found on the SpellList, the variable thisWeapon[3] contains the name of the entry in the SpellList
 						
 							// The object "fields" has all the values of the different fields of the attack (fields.Proficiency, fields.Mod, fields.Range, fields.Damage_Type, fields.Description, fields.To_Hit_Bonus, fields.Damage_Bonus, fields.Damage_Die, fields.Weight);
 						
 							// You can change the attributes of the "fields" object with the eval-string of atkAdd to affect what is put into the fields.
 						
-							// You can use the attributes of the "fields" object with the eval-string of atkCalc to check for things.
+							// You can use the attributes of the "fields" object with the eval-string of atkCalc to check for things, but changing them will have no effect on the sheet.
 						
 							// With the atkCalc you have to change the "output" object in order to affect the outcome of the calculations. This object has the following attributes: output.prof (wether or not to add the proficiency bonus to the To Hit), output.die (Damage Die to use), output.mod (ability modifier), output.modToDmg (wether or not to add the ability modifier to Damage), output.magic (any magic bonus that's to be added to both To Hit and Damage), output.bHit (the To Hit bonus from the Blue Text/Modifier field), output.bDmg (the Damage bonus from the Blue Text/Modifier field), output.extraHit (a number added to the To Hit that is reserved for this eval), output.extraDmg (a number added to the damage that is reserved for this eval)
 				}
@@ -192,6 +206,8 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 				
 				spells : ["light"], //optional; see "spellcastingList" object
 				
+				notspells : ["mending"], //optional; see "spellcastingList" object
+				
 				selection : ["light"], //optional if "spells" is defined; this is the default selection for the array specified in "spells"
 				
 				times : 2, //optional; this is the number of times the bonus spells should be added. //This can also be an array of 20 values. That way the number of times are level-dependent
@@ -208,6 +224,8 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 			},
 			
 			spellFirstColTitle : "Ki", //optional, only works if spellcastingBonus exists; if set to any value, this makes the first column of the captions on the spell sheet be set to the first two letters/numbers of that value
+			
+			vision : [["Darkvision", 60], ["Sunlight Sensitivity", 0]], //optional; An array of arrays that each have a length of 2; This adds the first value of each array to the Senses field. The second value is the range in feet. If no range is needed, put a 0 there. You can also add a modifier like "+30" or "*2" to have the appropriate calculation done with the range of sense
 		},
 		
 		"spellcasting" : {
@@ -240,6 +258,8 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 			armor : [false, false, true, false], //optional; the 4 entries are for proficiency in: ["light", "medium", "heavy", "shields"]. Be sure to always add all four statements of true/false!
 
 			weapons : [true, false, ["hand crossbow"]], //optional; the 3 entries are for: ["simple", "martial", "other"]. Be sure to always add both statements of true/false!
+			
+			addMod : { type : "skill", field : "Init", mod : "Int", text : "I can add my Intelligence modifier to initiative rolls." } //optional; This is an object, or an array of similar objects, for adding a modifier to a modifier field. Using this will make it so that the modifier is added to any value that is already there. // The 'mod' attribute can be any combination of numbers, mathematical operators, and three-letter ability score abbreviations // The 'type' attribute can be "skill" or "save", but can also be left empty "" // The 'field' attribute depends on the type, for "skill" it can be the name of a skill, or "Init" for initiative, or "All" for the all skills modifier; for "save" it can be the three-letter abbreviation of an ability score, or "All" for the all saves modifier. // If the 'type' attribute is left empty, the 'field' attribute has to be the exact name of the field the modifier has to be added to // The 'text' attribute is an explanation of why the modifier was added //NOTE: for modifiers to attacks, use calcChanges
 		},
 		
 		"subclassfeature3" : { //You need at least one entry named "subclassfeatureX". It signals the sheet to ask the user for which subclass he would like to have. The level of this feature should match the level the class needs to select a subclass. Once a subclass is selected, any feature with "subclassfeature" in the object name in the class entry will be ignored.
@@ -252,6 +272,49 @@ ClassList["myclass"] = { //Object name; Note the use of only lower case! Also no
 		"subclassfeature3.1" : {
 			name : "", //any feature whos name is empty like this one is, will be ignored. Since v12.5 of the sheet, an entry like this serves no function
 			minlevel : 3,
+		},
+		
+		"natural antivenom" : {
+			name : "Natural Antivenom",
+			source : ["UA:MC", 7],
+			minlevel : 9,
+			description : desc([
+				"I have advantage on saves vs. poison and resistance to poison damage",
+				"When I use a poultice, in addition to healing, I cure one poison effect on the creature",
+				"I gain proficiency with Constitution saving throws"
+			]),
+		
+			savetxt : { // Optional; this attribute defines entries to add to the field for "Saving Throw Advantages / Disadvantages"
+			
+				text : ["Dex save vs. area effects: fail \u2015 half dmg, success \u2015 no dmg", "Magic can't put me to sleep"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
+				
+				immune : ["poison", "disease"], // Optional; this is an array of strings that the character is immune to. This is put in the field after the text "Immune to ", so in this example it would result in "Immune to poison and disease"
+				
+				adv_vs : ["traps", "charmed"] // Optional; this is an array of things that the character has advantage on saves against. This is put in the field after the text "Adv. on saves vs. ", so in this example it would result in "Adv. on saves vs. traps and charmed"
+			},
+			
+			dmgres : ["Poison"], //optional; an array of damage types that the class gets resistance against. // If the resistance has a condition attached to it, like only being against nonmagical attacks, substitute the entry in the array with an array of 2: [the damage type, the damage type with the condition]. // For example: [["Bludgeoning", "Bludg. (nonmagical)"], ["Piercing", "Pierc. (nonmagical)"], ["Slashing", "Slash. (nonmagical)"]]
+			
+			saves : ["Con"] //optional; an array of the ability scores with which the class feature grants proficiency in saving throws
+	
+			toolProfs : [["Musical instrument", 3], ["Thieves' tools", "Dex"]], // optional; this is an array with the tool proficiencies gained. Each entry can be its own array of 2 entries. The first entry is the name of the tool and the second entry is either 1) a number if the tool is yet to be chosen, or 2) the 3-letter ability score abbreviation if the tool is to be listed in the skill section and have a bonus calculated
+			
+			languageProfs : [1, "Elvish"], // optional; this is an array of the language proficiencies gained. An entry can either be 1) a string that represents the language learned or 2) a number which is the number of language gained that can be chosen by the player
+			
+			speed : { //required; This sets a value for one or more speed modes, and/or a value to be added to a specific speed mode or to all speed modes // the attributes of this object can be "walk", "borrow", "climb", "fly", "swim", and "allModes"
+					
+				// all of the following attributes are optional and you can add more ("borrow" isn't part of this example!)
+				
+				walk : { spd : 30, enc : 20 }, // the objects "walk", "borrow", "climb", "fly", "swim" are all the same, they are an object with two attributes, 'spd' for the speed in feet, and 'enc' for the encumbered speed in feet.
+				
+				climb : { spd : "+50", enc : 0 }, // instead of numbers, you can also have modifiers. Modifiers are a string, starting with a mathematical operator, followed by a number (e.g. "-10", "+20"). // a value that is zero is ignored
+				
+				fly : { spd : "walk", enc : 0 }, // instead of a number/modifier, you can also set the attribute to "walk". This makes the speed mode assume the walking speed // Using an underscore as the first character means the value is only added if the value would be non-zero
+				
+				swim : { spd : "fixed60", enc : "fixed60" }, // if you include the word "fixed" together with a number, the movement mode will be that number, without any modifiers from other sources (like the Monk's speed bonus). However, if another entry that isn't 'fixed' does end up with a higher total while including any modifiers, that speed is used instead
+				
+				allModes : "+10" // the 'allModes' attribute can only consist of a modifier. This modifier is applied to all speed modes, both normal and encumbered. It is only applied if the speed mode exists, it won't give the character a borrow speed if it would otherwise have none, for example
+			},
 		},
 	}
 }

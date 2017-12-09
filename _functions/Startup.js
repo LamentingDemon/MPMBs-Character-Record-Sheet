@@ -1,20 +1,22 @@
 //functions to call at startup (in the right order)
-function InitializeEverything(noButtons) {
+function InitializeEverything(noButtons, noVars) {
 	if (!minVer) Hide("d20warning");
 	tDoc.delay = true;
 	tDoc.calculate = false;
 	GetStringifieds(); //populate some variables stored in fields
 	
 	RunUserScript();
-	//blabal
-	//define some variables after running the user scripts
-	AllSpellsArray = CreateSpellList({class : "any"}, true);
-	AllSpellsObject = CreateSpellObject(AllSpellsArray);
-	AddSpellsMenu = ParseSpellMenu();
+	
+	//define some document level variables after running the user scripts
+	if (!tDoc.info.AdvLogOnly && !noVars) {
+		AmendSpellsList();
+		setSpellVariables();
+	};
 	
 	if (!minVer) {
+		SetGearVariables();
 		setListsUnitSystem(false, true);
-		UAstartupCode();
+		if (!noVars) UAstartupCode();
 		FindClasses();
 		FindRace();
 		FindCompRace();
@@ -28,7 +30,8 @@ function InitializeEverything(noButtons) {
 		ApplyProficiencies(false);
 		UpdateTooltips();
 		SetRichTextFields();
-	}
+		MakeAdventureLeagueMenu();
+	};
 	
 	SetHighlighting();
 	if (!noButtons) MakeButtons();

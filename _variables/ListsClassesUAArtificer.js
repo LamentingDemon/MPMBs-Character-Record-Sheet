@@ -18,7 +18,10 @@ ClassList.artificer = {
 	die : 8,
 	saves : ["Con", "Int"],
 	skills : ["\n\n" + toUni("Artificer") + ": Choose three from Arcana, Deception, History, Investigation, Medicine, Nature, Religion, and Sleight of Hand.", "\n\n" + toUni("Multiclass Artificer") + ": Choose one from Arcana, Deception, History, Investigation, Medicine, Nature, Religion, and Sleight of Hand."],
-	tools : ["Thieves' tools + any two tools", "Any one tool"],
+	toolProfs : {
+		primary : [["Thieves' tools", "Dex"], ["Any tool", 2]],
+		secondary : [["Any tool", 1]]
+	},
 	armor : [
 		[true, true, false, false]
 	],
@@ -65,8 +68,8 @@ ClassList.artificer = {
 			minlevel : 2,
 			description : desc(["I have expertise with any tool proficiencies I gain from the Artificer class"]),
 			skillstxt : "\n\n" + toUni("Artificer") + ": expertise with with any tool proficiencies gained from the Artificer class.",
-			eval : "if (What(\"Too Text\").match(/thieves' tools/i)) { Checkbox(\"Too Exp\", true); };",
-			removeeval : "if (What(\"Too Text\").match(/thieves' tools/i)) { Checkbox(\"Too Exp\", false); };"
+			eval : "if ((/thieves.? tools/i).test(What(\"Too Text\"))) { Checkbox(\"Too Exp\", true); };",
+			removeeval : "if ((/thieves.? tools/i).test(What(\"Too Text\"))) { Checkbox(\"Too Exp\", false); };"
 		},
 		"wondrous invention" : {
 			name : "Wondrous Invention",
@@ -82,7 +85,7 @@ ClassList.artificer = {
 				return "5 items";
 			}),
 			extraname : "Wondrous Invention",
-			extrachoices : ["Bag of Holding (prereq: level 2 artificer)", "Cap of Water Breathing (prereq: level 2 artificer)", "Driftglobe (prereq: level 2 artificer)", "Goggles of Night (prereq: level 2 artificer)", "Sending Stones (prereq: level 2 artificer)", "Alchemy Jug (prereq: level 5 artificer)", "Helm of Comprehending Languages (prereq: level 5 artificer)", "Lantern of Revealing (prereq: level 5 artificer)", "Ring of Swimming (prereq: level 5 artificer)", "Robe of Useful Items (prereq: level 5 artificer)", "Rope of Climbing (prereq: level 5 artificer)", "Wand of Magic Detection (prereq: level 5 artificer)", "Wand of Secrets (prereq: level 5 artificer)", "Bag of Beans (prereq: level 10 artificer)", "Chime of Opening (prereq: level 10 artificer)", "Decanter of Endless Water (prereq: level 10 artificer)", "Eyes of Minute Seeing (prereq: level 10 artificer)", "Folding Boat (prereq: level 10 artificer)", "Heward’S Handy Haversack (prereq: level 10 artificer)", "Boots of Striding and Springing (prereq: level 15 artificer)", "Bracers of Archery (prereq: level 15 artificer)", "Brooch of Shielding (prereq: level 15 artificer)", "Broom of Flying (prereq: level 15 artificer)", "Hat of Disguise (prereq: level 15 artificer)", "Slippers of Spider Climbing (prereq: level 15 artificer)", "Eyes of the Eagle (prereq: level 20 artificer)", "Gem of Brightness (prereq: level 20 artificer)", "Gloves of Missile Snaring (prereq: level 20 artificer)", "Gloves of Swimming and Climbing (prereq: level 20 artificer)", "Ring of Jumping (prereq: level 20 artificer)", "Ring of Mind Shielding (prereq: level 20 artificer)", "Wings of Flying (prereq: level 20 artificer)"] //come back to this with the function to make the individual entries
+			extrachoices : ["Bag of Holding (prereq: level 2 artificer)", "Cap of Water Breathing (prereq: level 2 artificer)", "Driftglobe (prereq: level 2 artificer)", "Goggles of Night (prereq: level 2 artificer)", "Sending Stones (prereq: level 2 artificer)", "Alchemy Jug (prereq: level 5 artificer)", "Helm of Comprehending Languages (prereq: level 5 artificer)", "Lantern of Revealing (prereq: level 5 artificer)", "Ring of Swimming (prereq: level 5 artificer)", "Robe of Useful Items (prereq: level 5 artificer)", "Rope of Climbing (prereq: level 5 artificer)", "Wand of Magic Detection (prereq: level 5 artificer)", "Wand of Secrets (prereq: level 5 artificer)", "Bag of Beans (prereq: level 10 artificer)", "Chime of Opening (prereq: level 10 artificer)", "Decanter of Endless Water (prereq: level 10 artificer)", "Eyes of Minute Seeing (prereq: level 10 artificer)", "Folding Boat (prereq: level 10 artificer)", "Heward's Handy Haversack (prereq: level 10 artificer)", "Boots of Striding and Springing (prereq: level 15 artificer)", "Bracers of Archery (prereq: level 15 artificer)", "Brooch of Shielding (prereq: level 15 artificer)", "Broom of Flying (prereq: level 15 artificer)", "Hat of Disguise (prereq: level 15 artificer)", "Slippers of Spider Climbing (prereq: level 15 artificer)", "Eyes of the Eagle (prereq: level 20 artificer)", "Gem of Brightness (prereq: level 20 artificer)", "Gloves of Missile Snaring (prereq: level 20 artificer)", "Gloves of Swimming and Climbing (prereq: level 20 artificer)", "Ring of Jumping (prereq: level 20 artificer)", "Ring of Mind Shielding (prereq: level 20 artificer)", "Wings of Flying (prereq: level 20 artificer)"] //come back to this with the function to make the individual entries
 		},
 		"spellcasting" : {
 			name : "Spellcasting",
@@ -132,7 +135,9 @@ ClassList.artificer = {
 			source : ["UA:A", 4],
 			minlevel : 20,
 			description : desc(["I gain a +1 bonus to all saving throws per magic item I am currently attuned to"]),
-			save : "+1 to all saves per attuned magic item"
+			savetxt : {
+				text : ["+1 to all saves per attuned magic item"]
+			}
 		}
 	}
 };
@@ -235,18 +240,14 @@ ClassSubList["artificer-alchemist"] = {
 				"An object automatically fails its saving throw and takes maximum damage"
 			]),
 			additional : levels.map(function (n) {
-				if (n < 3) return "1d6 acid damage";
-				if (n < 5) return "2d6 acid damage";
-				if (n < 7) return "3d6 acid damage";
-				if (n < 9) return "4d6 acid damage";
-				if (n < 11) return "5d6 acid damage";
-				if (n < 13) return "6d6 acid damage";
-				if (n < 15) return "7d6 acid damage";
-				if (n < 17) return "8d6 acid damage";
-				if (n < 19) return "9d6 acid damage";
-				return "10d6 acid damage";
+				return Math.ceil(n / 2) + "d6 acid damage";
 			}),
-			action : ["action", ""]
+			action : ["action", ""],
+			eval : "AddWeapon('Alchemical Acid');",
+			removeeval : "RemoveWeapon('Alchemical Acid');",
+			calcChanges : {
+				atkAdd : ["if (WeaponName === 'alchemical acid' && classes.known.artificer && classes.known.artificer.level) {fields.Proficiency = true; fields.Damage_Die = function(n){return Math.ceil(n / 2) + 'd6';}(classes.known.artificer.level); }; ", ""]
+			}
 		},
 		"subclassfeature1.3" : {
 			name : "Formula: Alchemical Fire",
@@ -257,15 +258,14 @@ ClassSubList["artificer-alchemist"] = {
 				"It explodes and all within a 5-ft radius must succeed on a Dex save or take fire damage"
 			]),
 			additional : levels.map(function (n) {
-				if (n < 4) return "1d6 fire damage";
-				if (n < 7) return "2d6 fire damage";
-				if (n < 10) return "3d6 fire damage";
-				if (n < 13) return "4d6 fire damage";
-				if (n < 16) return "5d6 fire damage";
-				if (n < 19) return "6d6 fire damage";
-				return "7d6 fire damage";
+				return Math.ceil(n / 3) + "d6 fire damage";
 			}),
-			action : ["action", ""]
+			action : ["action", ""],
+			eval : "AddWeapon('Alchemical Fire');",
+			removeeval : "RemoveWeapon('Alchemical Fire');",
+			calcChanges : {
+				atkAdd : ["if (WeaponName === 'alchemical fire' && classes.known.artificer && classes.known.artificer.level) {fields.Proficiency = true; fields.Damage_Die = function(n){return Math.ceil(n / 3) + 'd6';}(classes.known.artificer.level); }; ", ""]
+			}
 		}
 	}
 };
@@ -286,8 +286,7 @@ ClassSubList["artificer-gunsmith"] = {
 				spells : ["mending"],
 				selection : ["mending"]
 			},
-			eval : "AddTool(\"Smith's tools\", \"Gunsmith (Master Smith)\");",
-			removeeval : "RemoveTool(\"Smith's tools\", \"Gunsmith (Master Smith)\");"
+			toolProfs : ["Smith's tools"]
 		},
 		"subclassfeature1.2" : {
 			name : "Thunder Cannon",
@@ -299,8 +298,8 @@ ClassSubList["artificer-gunsmith"] = {
 			]),
 			weapons : [false, false, ["thunder cannon"]],
 			action : ["bonus action", " (reload)"],
-			eval : "AddWeapon(\"Thunder Cannon\");",
-			removeeval : "RemoveWeapon(\"Thunder Cannon\");"
+			eval : "AddWeapon('Thunder Cannon');",
+			removeeval : "RemoveWeapon('Thunder Cannon');"
 		},
 		"subclassfeature1.3" : {
 			name : "Arcane Magazine",
@@ -317,11 +316,16 @@ ClassSubList["artificer-gunsmith"] = {
 			source : ["UA:A", 6],
 			minlevel : 3,
 			description : desc(["As an action, I can make an attack with my thunder cannon that does extra damage"]),
-			additional : levels.map(function (level) {
-				if (level < 3) return "";
-				return "+" + Math.floor((level - 1) / 2) + "d6 thunder damage";
+			additional : levels.map(function (n) {
+				if (n < 3) return "";
+				return "+" + Math.floor((n - 1) / 2) + "d6 thunder damage";
 			}),
-			action : ["action", ""]
+			action : ["action", ""],
+			eval : "AddWeapon('Thunder Cannon (Monger)');",
+			removeeval : "RemoveWeapon('Thunder Cannon (Monger)');",
+			calcChanges : {
+				atkAdd : ["if (WeaponName === 'thunder cannon-thunder monger' && classes.known.artificer && classes.known.artificer.level > 2) {fields.Description += '; +' + function(n){return Math.floor((n - 1) / 2) + 'd6 thunder damage';}(classes.known.artificer.level); }; ", ""]
+			}
 		},
 		"subclassfeature9" : {
 			name : "Blast Wave",
@@ -331,13 +335,18 @@ ClassSubList["artificer-gunsmith"] = {
 				"As an action, I can make a special attack with my thunder cannon in a 15-ft cone",
 				"Creatures in the area must make a Str save or take damage and pushed back 10 ft"
 			]),
-			additional : levels.map(function (level) {
-				return level < 9 ? "" :
-				level < 13 ? "2d6 force damage" :
-				level < 17 ? "3d6 force damage" :
+			additional : levels.map(function (n) {
+				return n < 9 ? "" :
+				n < 13 ? "2d6 force damage" :
+				n < 17 ? "3d6 force damage" :
 				"4d6 force damage";
 			}),
-			action : ["action", ""]
+			action : ["action", ""],
+			eval : "AddWeapon('Thunder Cannon (Blast Wave)');",
+			removeeval : "RemoveWeapon('Thunder Cannon (Blast Wave)');",
+			calcChanges : {
+				atkAdd : ["if (WeaponName === 'thunder cannon-blast wave' && classes.known.artificer && classes.known.artificer.level >= 13) {fields.Damage_Die = function(n){return (n < 17 ? 3 : 4) + 'd6';}(classes.known.artificer.level); }; ", ""]
+			}
 		},
 		"subclassfeature14" : {
 			name : "Piercing Round",
@@ -347,12 +356,17 @@ ClassSubList["artificer-gunsmith"] = {
 				"As an action, I can make a special attack with my thunder cannon in a 30-ft line",
 				"Creatures in the 5-ft wide line must make a Dex save or take damage"
 			]),
-			additional : levels.map(function (level) {
-				return level < 14 ? "" :
-				level < 19 ? "4d6 lightning damage" :
+			additional : levels.map(function (n) {
+				return n < 14 ? "" :
+				n < 19 ? "4d6 lightning damage" :
 				"6d6 lightning damage";
 			}),
-			action : ["action", ""]
+			action : ["action", ""],
+			eval : "AddWeapon('Thunder Cannon (Piercing Round)');",
+			removeeval : "RemoveWeapon('Thunder Cannon (Piercing Round)');",
+			calcChanges : {
+				atkAdd : ["if (WeaponName === 'thunder cannon-piercing round' && classes.known.artificer && classes.known.artificer.level >= 19) {fields.Damage_Die = '6d6'; }; ", ""]
+			}
 		},
 		"subclassfeature17" : {
 			name : "Explosive Round",
@@ -364,7 +378,9 @@ ClassSubList["artificer-gunsmith"] = {
 				"Creatures in the area must make a Dexterity saving throw or take 4d8 fire damage"
 			]),
 			additional : "4d8 fire damage",
-			action : ["action", ""]
+			action : ["action", ""],
+			eval : "AddWeapon('Thunder Cannon (Explosive Round)');",
+			removeeval : "RemoveWeapon('Thunder Cannon (Explosive Round)');"
 		}
 	}
 };
@@ -591,8 +607,8 @@ var MagicItemsList = {
 		weight : 3,
 		descriptionFull : "While wearing this helm, you can use an action to cast the comprehend languages spell from it at will."
 	},
-	"heward’s handy haversack" : {
-		name : "Heward’S Handy Haversack",
+	"heward's handy haversack" : {
+		name : "Heward's Handy Haversack",
 		source : ["D", 174],
 		description : "The backpack weighs 5 lb, but has two side pouches that hold up to 20 lb (2 cu ft), while it's central pouch holds up to 80 lb (8 cu ft). Retrieving an item from it requires an action. If the bag is overloaded, pierced, or torn, it is destroyed, as is its content.",
 		descriptionLong : false,
@@ -671,13 +687,13 @@ var MagicItemsList = {
 	"sending stones" : {
 		name : "Sending Stones",
 		source : ["D", 199],
-		description : "While I touch one of the pair of stones, I can use an action to cast the sending spell, targeting the bearer of the other stone. If no creature has the other stone, the spell won’t cast. Once it is cast, neither stone can be used again until the next dawn.",
+		description : "While I touch one of the pair of stones, I can use an action to cast the sending spell, targeting the bearer of the other stone. If no creature has the other stone, the spell won't cast. Once it is cast, neither stone can be used again until the next dawn.",
 		descriptionLong : false,
 		category : "wondrous item",
 		rarity : "uncommon",
 		attunement : false,
 		weight : 0,
-		descriptionFull : "Sending stones come in pairs, with each smooth stone carved to match the other so the pairing is easily recognized. While you touch one stone, you can use an action to cast the sending spell from it. The target is the bearer of the other stone. If no creature bears the other stone, you know that fact as soon as you use the stone and don’t cast the spell." + "\n   " + "Once sending is cast through the stones, they can’t be used again until the next dawn. If one of the stones in a pair is destroyed, the other one becomes nonmagical."
+		descriptionFull : "Sending stones come in pairs, with each smooth stone carved to match the other so the pairing is easily recognized. While you touch one stone, you can use an action to cast the sending spell from it. The target is the bearer of the other stone. If no creature bears the other stone, you know that fact as soon as you use the stone and don't cast the spell." + "\n   " + "Once sending is cast through the stones, they can't be used again until the next dawn. If one of the stones in a pair is destroyed, the other one becomes nonmagical."
 	},
 	"slippers of spider climbing" : {
 		name : "Slippers of Spider Climbing",

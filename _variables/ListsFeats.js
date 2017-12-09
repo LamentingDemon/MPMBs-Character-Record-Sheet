@@ -3,14 +3,14 @@ var FeatsList = {
 		name : "Actor",
 		source : ["P", 165],
 		description : "Advantage on Charisma (Deception) and (Performance) if trying to pass as another. I can mimic a person's speech or other creature's sounds if I've heard it for at least 1 minute. Wisdom (Insight) vs. Charisma (Deception) to determine the sound is faked. [+1 Charisma]",
-		improvements : "Actor (feat): +1 Charisma;"
+		improvements : "Actor (feat): +1 Charisma;",
+		scores : [0, 0, 0, 0, 0, 1]
 	},
 	"alert" : {
 		name : "Alert",
 		source : ["P", 165],
 		description : "I can't be surprised while I'm conscious. I have a +5 bonus on initiative rolls. Other creatures don't gain advantage on attack rolls against me as a result of being hidden from me.",
-		eval : "Value(\"Init Bonus\", 5);",
-		removeeval : "Value(\"Init Bonus\", \"\");"
+		addMod : { type : "skill", field : "Init", mod : 5, text : "I have a +5 bonus on initiative rolls." }
 	},
 	"athlete" : {
 		name : "Athlete",
@@ -22,17 +22,15 @@ var FeatsList = {
 		name : "Charger",
 		source : ["P", 165],
 		description : "When taking the Dash action and moving 10 feet or more in a straight line, I can immediately take a bonus action to make either one melee weapon attack with +5 damage or try to shove the target up to 10 feet away.",
-		eval : "AddAction(\"bonus action\", \"Charger (when taking dash action)\", \"the Charger feat\");",
-		removeeval : "RemoveAction(\"bonus action\", \"Charger (when taking dash action)\");"
+		action : ["bonus action", " (after Dash action)"]
 	},
 	"crossbow expert" : {
 		name : "Crossbow Expert",
 		source : ["P", 165],
-		description : "I ignore the loading quality of crossbows I'm proficient with. I don't suffer disadvantage on ranged attack rolls for being within 5 feet of a hostile. When I attack with a one-handed weapon, I can use a bonus action to attack with a loaded hand crossbow I'm holding.",
-		eval : "AddAction(\"bonus action\", \"Hand crossbow (when taking attack action)\", \"the Crossbow Expert feat\");",
-		removeeval : "AddAction(\"bonus action\", \"Hand crossbow (when taking attack action)\");",
+		description : "I ignore the loading quality of crossbows I'm proficient with. I don't suffer disadvantage on ranged attack rolls for being within 5 feet of a hostile. When I attack with a one-handed weapon, I can use a bonus action to attack with a hand crossbow I'm holding.",
+		action : ["bonus action", " (with Attack action)"],
 		calcChanges : {
-			atkAdd : ["if (WeaponName.match(/crossbow/i) && output.Proficiency) {output.Description.replace(/loading,? ?/i, '');};", "I ignore the loading quality of crossbows I'm proficient with."]
+			atkAdd : ["if ((/crossbow/i).test(WeaponName) && fields.Proficiency) {fields.Description = fields.Description.replace(/(,? ?loading|loading,? ?)/i, '');};", "I ignore the loading quality of crossbows I'm proficient with."]
 		}
 	},
 	"defensive duelist" : {
@@ -40,8 +38,8 @@ var FeatsList = {
 		source : ["P", 165],
 		description : "When wielding a finesse weapon with which I am proficient and another creature hits me with a melee attack, I can use my reaction to add my proficiency bonus to my AC for that attack, potentially causing the attack to miss me.",
 		prerequisite : "Dexterity 13 or higher",
-		eval : "AddAction(\"reaction\", \"Defensive Duelist (when hit in melee)\", \"the Defensive Duelist feat\");",
-		removeeval : "RemoveAction(\"reaction\", \"Defensive Duelist (when hit in melee)\");"
+		prereqeval : "What('Dex') >= 13",
+		action : ["reaction", " (when hit in melee)"]
 	},
 	"dual wielder" : {
 		name : "Dual Wielder",
@@ -54,52 +52,55 @@ var FeatsList = {
 		name : "Dungeon Delver",
 		source : ["P", 166],
 		description : "I have advantage on Wis (Perception) and Int (Investigation) checks made to detect the presence of secret doors. I can search for traps while traveling at a normal pace. I have resistance to damage dealt by traps and advantage on saves to avoid or resist traps.",
-		eval : "AddString(\"Saving Throw advantages / disadvantages\", \"Advantage on saves vs. traps.\", \"; \"); AddResistance(\"Traps\", \"Dungeon Delver\"); AddString(\"Vision\", \"Adv. on Perception and Investigation for secret doors\", \"; \");",
-		removeeval : "RemoveString(\"Saving Throw advantages \/ disadvantages\", \"Advantage on saves vs. traps.\"); RemoveResistance(\"Traps\");"
+		dmgres : ["Traps"],
+		savetxt : { adv_vs : ["traps"] },
+		vision : [["Adv. on Perception and Investigation for secret doors", 0]]
 	},
 	"durable" : {
 		name : "Durable",
 		source : ["P", 166],
 		description : "When I roll a hit die to regain hit points, the minimum number of hit points I regain from the roll equals twice my Constitution modifier (minimum of 2). [+1 Constitution]",
-		improvements : "Durable (feat): +1 Constitution;"
+		improvements : "Durable (feat): +1 Constitution;",
+		scores : [0, 0, 1, 0, 0, 0]
 	},
 	"elemental adept" : {
 		name : "Elemental Adept",
 		source : ["P", 166],
 		description : "Choose one of the damage types: acid, cold, fire, lightning, or thunder. Spells I cast ignore resistance to damage from this damage type. For any spell I cast that deals this damage type, I can treat any 1 on a damage die as a 2.",
-		prerequisite : "The ability to cast at least one spell"
+		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'"
 	},
 	"grappler" : {
 		name : "Grappler",
 		source : ["P", 167],
 		description : "I have advantage on attack rolls against a creature I am grappling. As an action, I can try to pin a creature grappled by me. If I succeed on a grapple check, both the creature and I are restrained until the grapple ends.",
 		prerequisite : "Strength 13 or higher",
-		eval : "AddAction(\"action\", \"Pin grappled opponent\", \"the Grappler feat\");",
-		removeeval : "RemoveAction(\"action\", \"Pin grappled opponent\");"
+		prereqeval : "What('Str') >= 13",
+		action : ["action", " feat (pin grappled)"]
 	},
 	"great weapon master" : {
 		name : "Great Weapon Master",
 		source : ["P", 167],
 		description : "If I score a critical hit or reduce a creature to 0 hit points with a melee weapon in my turn, I can make one melee weapon attack as a bonus action. With a heavy melee weapon, I can choose to take a -5 penalty on the attack roll for +10 on the attack's damage.",
-		eval : "AddAction(\"bonus action\", \"Melee weapon attack (after crit or take-down)\", \"the Great Weapon Master feat\");",
-		removeeval : "RemoveAction(\"bonus action\", \"Melee weapon attack (after crit or take-down)\");",
+		action : ["bonus action", " (after crit or take-down)"],
 		calcChanges : {
-			atkCalc : ["if ((!theWea || !theWea.type.match(/cantrip|spell/i)) && fields.Range.match(/melee/i) && fields.Description.match(/heavy/i) && WeaponText.match(/power.{0,3}attack|great.{0,3}weapon.{0,3}master/i)) {output.extraDmg += 10; output.extraHit -= 5;};", "If I include the words 'Power Attack' or 'Great Weapon Master' in a heavy melee weapon's name or description, the calculation will put a -5 penalty on the attack's To Hit and +10 on its Damage."]
+			atkCalc : ["if (isMeleeWeapon && (/heavy/i).test(fields.Description) && (/power.{0,3}attack|great.{0,3}weapon.{0,3}master/i).test(WeaponText)) {output.extraDmg += 10; output.extraHit -= 5;};", "If I include the words 'Power Attack' or 'Great Weapon Master' in a heavy melee weapon's name or description, the calculation will put a -5 penalty on the attack's To Hit and +10 on its Damage."]
 		}
 	},
 	"healer" : {
 		name : "Healer",
 		source : ["P", 167],
 		description : "Using a healer's kit to stabilize someone gives them 1 hit point as well. As an action, I can spend one use of a healer's kit to restore 1d6 + 4 + (creature's HD) hit points. After that, the creature can't gain hit points from this feat again until it finishes a short rest.",
-		eval : "AddAction(\"action\", \"Healer (1d6+4+HD with healing kit)\", \"the Healer feat\");",
-		removeeval : "RemoveAction(\"action\", \"Healer (1d6+4+HD with healing kit)\");"
+		action : ["action", " (1d6+4+HD with healing kit)"]
 	},
 	"heavily armored" : {
 		name : "Heavily Armored",
 		source : ["P", 167],
 		description : "I gain proficiency with heavy armor. [+1 Strength]",
 		prerequisite : "Proficiency with medium armor",
+		prereqeval : "tDoc.getField('Proficiency Armor Medium').isBoxChecked(0)",
 		improvements : "Heavily Armored (feat): +1 Strength;",
+		scores : [1, 0, 0, 0, 0, 0],
 		armor : [false, false, true, false]
 	},
 	"heavy armor master" : {
@@ -107,19 +108,23 @@ var FeatsList = {
 		source : ["P", 167],
 		description : "While wearing heavy armor, bludgeoning, piercing, and slashing damage taken from nonmagical weapons is reduced by 3. [+1 Strength]",
 		prerequisite : "Proficiency with heavy armor",
-		improvements : "Heavy Armor Master (feat): +1 Strength;"
+		prereqeval : "tDoc.getField('Proficiency Armor Heavy').isBoxChecked(0)",
+		improvements : "Heavy Armor Master (feat): +1 Strength;",
+		scores : [1, 0, 0, 0, 0, 0]
 	},
 	"inspiring leader" : {
 		name : "Inspiring Leader",
 		source : ["P", 167],
 		calculate : "event.value = \"I can spend 10 minutes inspiring up to 6 friendly creatures within 30 feet who can see or hear and can understand me. Each gains lvl (\" + What(\"Character Level\") + \") + Cha mod (\" + What(\"Cha Mod\") + \") temporary hit points. One can't gain temporary hit points from this feat again until after a short rest.\"",
-		prerequisite : "Charisma 13 or higher"
+		prerequisite : "Charisma 13 or higher",
+		prereqeval : "What('Cha') >= 13"
 	},
 	"keen mind" : {
 		name : "Keen Mind",
 		source : ["P", 167],
 		description : "I always know which way is north and the number of hours left before the next sunrise or sunset. I can accurately recall anything I have seen or heard within the past month. [+1 Intelligence]",
-		improvements : "Keen Mind (feat): +1 Intelligence;"
+		improvements : "Keen Mind (feat): +1 Intelligence;",
+		scores : [0, 0, 0, 1, 0, 0]
 	},
 	"lightly armored" : {
 		name : "Lightly Armored",
@@ -133,8 +138,8 @@ var FeatsList = {
 		source : ["P", 167],
 		calculate : "event.value = \"I can ably create written ciphers that others can't decipher unless I teach them, they succeed on an Intelligence check DC \" + (What(\"Int\") + What(\"Proficiency Bonus\")) + \" (Intelligence score + proficiency bonus), or they use magic to decipher it. I learn three languages of my choice. [+1 Intelligence]\"",
 		improvements : "Linguist (feat): +1 Intelligence;",
-		eval : "AddLanguage(\"+3 from Linguist feat\", \"the Linguist feat\");",
-		removeeval : "RemoveLanguage(\"+3 from Linguist feat\", \"the Linguist feat\");"
+		scores : [0, 0, 0, 1, 0, 0],
+		languageProfs : [3]
 	},
 	"lucky" : {
 		name : "Lucky",
@@ -147,50 +152,51 @@ var FeatsList = {
 		name : "Mage Slayer",
 		source : ["P", 168],
 		description : "As a reaction, I can make a melee weapon attack on a creature within 5 ft of me that casts a spell. Concentration checks from damage from me are made with disadvantage. I have advantage on saving throws against spells cast by creatures within 5 feet of me.",
-		eval : "AddString(\"Saving Throw advantages \/ disadvantages\", \"Advantage on saves vs. spells cast within 5 ft\", \"; \"); AddAction(\"reaction\", \"Melee weapon attack (if spell cast in 5 ft)\", \"the Mage Slayer feat\");",
-		removeeval : "RemoveString(\"Saving Throw advantages \/ disadvantages\", \"Advantage on saves vs. spells cast within 5 ft\"); RemoveAction(\"reaction\", \"Melee weapon attack (if spell cast in 5 ft)\");"
+		savetxt : { adv_vs : ["spells cast within 5 ft"] },
+		eval : "AddAction('reaction', 'Melee weapon attack (if spell cast in 5 ft)', 'the Mage Slayer feat');",
+		removeeval : "RemoveAction('reaction', 'Melee weapon attack (if spell cast in 5 ft)');"
 	},
 	"magic initiate [bard]" : {
 		name : "Magic Initiate [Bard]",
 		source : ["P", 168],
 		description : "I learn two cantrips and one 1st-level spell of my choice from the bard's spell list.\nI can cast the spell it at its lowest level once per long rest.\nCharisma is my spellcasting ability for these.",
 		eval : "CurrentSpells[\"magic initiate bard\"] = {name : \"Magic Initiate [Bard]\", ability : 6, list : {class : \"bard\"}, known : {cantrips : 2}, bonus : {bonus1 : {name : \"1st-Level Spell\", class : \"bard\", level : [1, 1], oncelr : true}}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"magic initiate bard\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"magic initiate bard\"]; SetStringifieds(\"spells\");"
 	},
 	"magic initiate [cleric]" : {
 		name : "Magic Initiate [Cleric]",
 		source : ["P", 168],
 		description : "I learn two cantrips and one 1st-level spell of my choice from the cleric's spell list.\nI can cast the spell it at its lowest level once per long rest.\nWisdom is my spellcasting ability for these.",
 		eval : "CurrentSpells[\"magic initiate cleric\"] = {name : \"Magic Initiate [Cleric]\", ability : 5, list : {class : \"cleric\"}, known : {cantrips : 2}, bonus : {bonus1 : {name : \"1st-Level Spell\", class : \"cleric\", level : [1, 1], oncelr : true}}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"magic initiate cleric\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"magic initiate cleric\"]; SetStringifieds(\"spells\");"
 	},
 	"magic initiate [druid]" : {
 		name : "Magic Initiate [Druid]",
 		source : ["P", 168],
 		description : "I learn two cantrips and one 1st-level spell of my choice from the druid's spell list.\nI can cast the spell it at its lowest level once per long rest.\nWisdom is my spellcasting ability for these.",
 		eval : "CurrentSpells[\"magic initiate druid\"] = {name : \"Magic Initiate [Druid]\", ability : 5, list : {class : \"druid\"}, known : {cantrips : 2}, bonus : {bonus1 : {name : \"1st-Level Spell\", class : \"druid\", level : [1, 1], oncelr : true}}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"magic initiate druid\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"magic initiate druid\"]; SetStringifieds(\"spells\");"
 	},
 	"magic initiate [sorcerer]" : {
 		name : "Magic Initiate [Sorcerer]",
 		source : ["P", 168],
 		description : "I learn two cantrips and one 1st-level spell of my choice from the sorcerer's spell list.\nI can cast the spell it at its lowest level once per long rest.\nCharisma is my spellcasting ability for these.",
 		eval : "CurrentSpells[\"magic initiate sorcerer\"] = {name : \"Magic Initiate [Sorcerer]\", ability : 6, list : {class : \"sorcerer\"}, known : {cantrips : 2}, bonus : {bonus1 : {name : \"1st-Level Spell\", class : \"sorcerer\", level : [1, 1], oncelr : true}}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"magic initiate sorcerer\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"magic initiate sorcerer\"]; SetStringifieds(\"spells\");"
 	},
 	"magic initiate [warlock]" : {
 		name : "Magic Initiate [Warlock]",
 		source : ["P", 168],
 		description : "I learn two cantrips and one 1st-level spell of my choice from the warlock's spell list.\nI can cast the spell it at its lowest level once per long rest.\nCharisma is my spellcasting ability for these.",
 		eval : "CurrentSpells[\"magic initiate warlock\"] = {name : \"Magic Initiate [Warlock]\", ability : 6, list : {class : \"warlock\"}, known : {cantrips : 2}, bonus : {bonus1 : {name : \"1st-Level Spell\", class : \"warlock\", level : [1, 1], oncelr : true}}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"magic initiate warlock\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"magic initiate warlock\"]; SetStringifieds(\"spells\");"
 	},
 	"magic initiate [wizard]" : {
 		name : "Magic Initiate [Wizard]",
 		source : ["P", 168],
 		description : "I learn two cantrips and one 1st-level spell of my choice from the wizard's spell list.\nI can cast the spell it at its lowest level once per long rest.\nIntelligence is my spellcasting ability for these.",
 		eval : "CurrentSpells[\"magic initiate wizard\"] = {name : \"Magic Initiate  [Wizard]\", ability : 4, list : {class : \"wizard\"}, known : {cantrips : 2}, bonus : {bonus1 : {name : \"1st-Level Spell\", class : \"wizard\", level : [1, 1], oncelr : true}}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"magic initiate wizard\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"magic initiate wizard\"]; SetStringifieds(\"spells\");"
 	},
 	"martial adept" : {
 		name : "Martial Adept",
@@ -204,21 +210,22 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "Wearing medium armor doesn't impose disadvantage on my Dexterity (Stealth) checks. When I wear medium armor, I can add up to 3, rather than 2, to my AC if my Dexterity is 16 or higher.",
 		prerequisite : "Proficiency with medium armor",
-		eval : "Value(\"Medium Armor Max Mod\", 3); if (CurrentArmour.known && ArmourList[CurrentArmour.known].type === \"medium\") {Checkbox(\"AC Stealth Disadvantage\", false)}",
-		removeeval : "tDoc.resetForm([\"Medium Armor Max Mod\"]); if (CurrentArmour.known && ArmourList[CurrentArmour.known].type === \"medium\") {Checkbox(\"AC Stealth Disadvantage\", ArmourList[CurrentArmour.known].stealthdis)};"
+		prereqeval : "tDoc.getField('Proficiency Armor Medium').isBoxChecked(0)",
+		eval : "Value('Medium Armor Max Mod', 3); if (CurrentArmour.known && ArmourList[CurrentArmour.known].type === 'medium') {Checkbox('AC Stealth Disadvantage', false); ShowHideStealthDisadv();}",
+		removeeval : "tDoc.resetForm(['Medium Armor Max Mod']); if (CurrentArmour.known && ArmourList[CurrentArmour.known].type === 'medium') {Checkbox('AC Stealth Disadvantage', ArmourList[CurrentArmour.known].stealthdis && !(/mithral/i).test(CurrentArmour.field)); ShowHideStealthDisadv();};"
 	},
 	"mobile" : {
 		name : "Mobile",
 		source : ["P", 168],
 		description : "When I use the Dash action, difficult terrain doesn't cost me extra movement that turn. When I make a melee attack against a creature, I don't provoke opportunity attacks from that creature for the rest of the turn, whether I hit or not. [+10 ft speed]",
-		eval : "ChangeSpeed(10);",
-		removeeval : "ChangeSpeed(-10);"
+		speed : { allModes : "+10" }
 	},
 	"moderately armored" : {
 		name : "Moderately Armored",
 		source : ["P", 168],
 		description : "I gain proficiency with medium armor and shields. [+1 Strength or Dexterity]",
 		prerequisite : "Proficiency with light armor",
+		prereqeval : "tDoc.getField('Proficiency Armor Light').isBoxChecked(0)",
 		improvements : "Moderately Armored (feat): +1 Strength or Dexterity;",
 		armor : [false, true, false, true]
 	},
@@ -232,8 +239,7 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "If I can see a creature's mouth while it is speaking a language I understand, I can interpret what it's saying by reading its lips. I have a +5 bonus to passive Wisdom (Perception) and passive Intelligence (Investigation) scores. [+1 Intelligence or Wisdom]",
 		improvements : "Observant (feat): +1 Intelligence or Wisdom;",
-		eval : "Value(\"Passive Perception Bonus\", 5, \"The Observant feat gives a +5 bonus to passive Wisdom (Perception)\");",
-		removeeval : "Value(\"Passive Perception Bonus\", \"\", \"\");"
+		addMod : { type : "skill", field : "passive perception", mod : 5, text : "I have a +5 bonus to passive Wisdom (Perception)." }
 	},
 	"polearm master" : {
 		name : "Polearm Master",
@@ -248,8 +254,8 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "I gain proficiency with Strength saving throws. [+1 Strength]",
 		improvements : "Resilient (feat): +1 Strength;",
-		eval : "Checkbox(\"Str ST Prof\", true, \"Proficiency with Strength saving throw was gained from the Resilient feat\")",
-		removeeval : "Checkbox(\"Str ST Prof\", false, \"\")"
+		scores : [1, 0, 0, 0, 0, 0],
+		saves : ["Str"]
 
 	},
 	"resilient [dexterity]" : {
@@ -257,8 +263,8 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "I gain proficiency with Dexterity saving throws. [+1 Dexterity]",
 		improvements : "Resilient (feat): +1 Dexterity;",
-		eval : "Checkbox(\"Dex ST Prof\", true, \"Proficiency with Dexterity saving throw was gained from the Resilient feat\")",
-		removeeval : "Checkbox(\"Dex ST Prof\", false, \"\")"
+		scores : [0, 1, 0, 0, 0, 0],
+		saves : ["Dex"]
 
 	},
 	"resilient [constitution]" : {
@@ -266,8 +272,8 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "I gain proficiency with Constitution saving throws. [+1 Constitution]",
 		improvements : "Resilient (feat): +1 Constitution;",
-		eval : "Checkbox(\"Con ST Prof\", true, \"Proficiency with Constitution saving throw was gained from the Resilient feat\")",
-		removeeval : "Checkbox(\"Con ST Prof\", false, \"\")"
+		scores : [0, 0, 1, 0, 0, 0],
+		saves : ["Con"]
 
 	},
 	"resilient [intelligence]" : {
@@ -275,8 +281,8 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "I gain proficiency with Intelligence saving throws. [+1 Intelligence]",
 		improvements : "Resilient (feat): +1 Intelligence;",
-		eval : "Checkbox(\"Int ST Prof\", true, \"Proficiency with Intelligence saving throw was gained from the Resilient feat\")",
-		removeeval : "Checkbox(\"Int ST Prof\", false, \"\")"
+		scores : [0, 0, 0, 1, 0, 0],
+		saves : ["Int"]
 
 	},
 	"resilient [wisdom]" : {
@@ -284,8 +290,8 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "I gain proficiency with Wisdom saving throws. [+1 Wisdom]",
 		improvements : "Resilient (feat): +1 Wisdom;",
-		eval : "Checkbox(\"Wis ST Prof\", true, \"Proficiency with Wisdom saving throw was gained from the Resilient feat\")",
-		removeeval : "Checkbox(\"Wis ST Prof\", false, \"\")"
+		scores : [0, 0, 0, 0, 1, 0],
+		saves : ["Wis"]
 
 	},
 	"resilient [charisma]" : {
@@ -293,8 +299,8 @@ var FeatsList = {
 		source : ["P", 168],
 		description : "I gain proficiency with Charisma saving throws. [+1 Charisma]",
 		improvements : "Resilient (feat): +1 Charisma;",
-		eval : "Checkbox(\"Cha ST Prof\", true, \"Proficiency with Charisma saving throw was gained from the Resilient feat\")",
-		removeeval : "Checkbox(\"Cha ST Prof\", false, \"\")"
+		scores : [0, 0, 0, 0, 0, 1],
+		saves : ["Cha"]
 
 	},
 	"ritual caster [bard]" : {
@@ -302,48 +308,54 @@ var FeatsList = {
 		source : ["P", 169],
 		description : "I can cast spells in my ritual book as rituals only. I gain two 1st-level ritual bard spells.\nI can copy ritual bard spells that I find into my book if they are not more than half my level (2 hours and 50 gp per spell level). Charisma is my spellcasting ability for these.",
 		prerequisite : "Intelligence or Wisdom 13 or higher",
+		prereqeval : "What('Int') >= 13 || What('Wis') >= 13",
 		eval : "CurrentSpells[\"ritual caster bard\"] = {name : \"Ritual Book [Bard]\", ability : 6, list : {class : \"bard\", ritual : true}, known : {spells : \"book\"}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"ritual caster bard\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"ritual caster bard\"]; SetStringifieds(\"spells\");"
 	},
 	"ritual caster [cleric]" : {
 		name : "Ritual Caster [Cleric]",
 		source : ["P", 169],
 		description : "I can cast spells in my ritual book as rituals only. I gain two 1st-level ritual cleric spells.\nI can copy ritual cleric spells that I find into my book if they are not more than half my level (2 hours and 50 gp per spell level). Wisdom is my spellcasting ability for these.",
 		prerequisite : "Intelligence or Wisdom 13 or higher",
+		prereqeval : "What('Int') >= 13 || What('Wis') >= 13",
 		eval : "CurrentSpells[\"ritual caster cleric\"] = {name : \"Ritual Book [Cleric]\", ability : 5, list : {class : \"cleric\", ritual : true}, known : {spells : \"book\"}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"ritual caster cleric\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"ritual caster cleric\"]; SetStringifieds(\"spells\");"
 	},
 	"ritual caster [druid]" : {
 		name : "Ritual Caster [Druid]",
 		source : ["P", 169],
 		description : "I can cast spells in my ritual book as rituals only. I gain two 1st-level ritual druid spells.\nI can copy ritual druid spells that I find into my book if they are not more than half my level (2 hours and 50 gp per spell level). Wisdom is my spellcasting ability for these.",
 		prerequisite : "Intelligence or Wisdom 13 or higher",
+		prereqeval : "What('Int') >= 13 || What('Wis') >= 13",
 		eval : "CurrentSpells[\"ritual caster druid\"] = {name : \"Ritual Book [Druid]\", ability : 5, list : {class : \"druid\", ritual : true}, known : {spells : \"book\"}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"ritual caster druid\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"ritual caster druid\"]; SetStringifieds(\"spells\");"
 	},
 	"ritual caster [sorcerer]" : {
 		name : "Ritual Caster [Sorcerer]",
 		source : ["P", 169],
 		description : "I can cast spells in my ritual book as rituals only. I gain two 1st-level ritual sorcerer spells.\nI can copy ritual sorcerer spells that I find into my book if they are not more than half my level (2 hours and 50 gp per spell level). Charisma is my spellcasting ability for these.",
 		prerequisite : "Intelligence or Wisdom 13 or higher",
+		prereqeval : "What('Int') >= 13 || What('Wis') >= 13",
 		eval : "CurrentSpells[\"ritual caster sorcerer\"] = {name : \"Ritual Book [Sorcerer]\", ability : 6, list : {class : \"sorcerer\", ritual : true}, known : {spells : \"book\"}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"ritual caster sorcerer\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"ritual caster sorcerer\"]; SetStringifieds(\"spells\");"
 	},
 	"ritual caster [warlock]" : {
 		name : "Ritual Caster [Warlock]",
 		source : ["P", 169],
 		description : "I can cast spells in my ritual book as rituals only. I gain two 1st-level ritual warlock spells.\nI can copy ritual warlock spells that I find into my book if they are not more than half my level (2 hours and 50 gp per spell level). Charisma is my spellcasting ability for these.",
 		prerequisite : "Intelligence or Wisdom 13 or higher",
+		prereqeval : "What('Int') >= 13 || What('Wis') >= 13",
 		eval : "CurrentSpells[\"ritual caster warlock\"] = {name : \"Ritual Book [Warlock]\", ability : 6, list : {class : \"warlock\", ritual : true}, known : {spells : \"book\"}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"ritual caster warlock\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"ritual caster warlock\"]; SetStringifieds(\"spells\");"
 	},
 	"ritual caster [wizard]" : {
 		name : "Ritual Caster [Wizard]",
 		source : ["P", 169],
 		description : "I can cast spells in my ritual book as rituals only. I gain two 1st-level ritual wizard spells.\nI can copy ritual wizard spells that I find into my book if they are not more than half my level (2 hours and 50 gp per spell level). Intelligence is my spellcasting ability for these.",
 		prerequisite : "Intelligence or Wisdom 13 or higher",
+		prereqeval : "What('Int') >= 13 || What('Wis') >= 13",
 		eval : "CurrentSpells[\"ritual caster wizard\"] = {name : \"Ritual Book [Wizard]\", ability : 4, list : {class : \"wizard\", ritual : true}, known : {spells : \"book\"}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"ritual caster wizard\"]; SetStringifieds(\"spells\");",
+		removeeval : "delete CurrentSpells[\"ritual caster wizard\"]; SetStringifieds(\"spells\");"
 	},
 	"savage attacker" : {
 		name : "Savage Attacker",
@@ -354,23 +366,22 @@ var FeatsList = {
 		name : "Sentinel",
 		source : ["P", 169],
 		description : "Creatures I hit with opportunity attacks have 0 speed for this turn. The Disengage action doesn't work on me. When a creature within 5 ft makes an attack against a target other than me, I can use my reaction to make a melee weapon attack against the attacker.",
-		eval : "AddAction(\"reaction\", \"Melee weapon attack (after attack on ally)\", \"the Sentinel feat\");",
-		removeeval : "RemoveAction(\"reaction\", \"Melee weapon attack (after attack on ally)\");"
+		action : ["reaction", " (after attack on ally)"]
 	},
 	"sharpshooter" : {
 		name : "Sharpshooter",
 		source : ["P", 170],
 		description : "My ranged weapon attacks don't have disadvantage on long range and ignore half cover and three-quarters cover. With a ranged weapon that I am proficient with, I can choose to take a -5 penalty on the attack roll for +10 on the attack's damage.",
 		calcChanges : {
-			atkCalc : ["if ((!theWea || !theWea.type.match(/cantrip|spell/i)) && !fields.Range.match(/melee/i) && WeaponText.match(/power.{0,3}attack|sharp.{0,3}shoo?t/i)) {output.extraDmg += 10; output.extraHit -= 5;};", "If I include the words 'Power Attack', 'Sharpshooter', or 'Sharpshot' in a ranged weapon's name or description, the calculation will put a -5 penalty on the attack's To Hit and +10 on its Damage."]
+			atkCalc : ["if (isRangedWeapon && (/power.{0,3}attack|sharp.{0,3}shoo?t/i).test(WeaponText)) {output.extraDmg += 10; output.extraHit -= 5;};", "If I include the words 'Power Attack', 'Sharpshooter', or 'Sharpshot' in a ranged weapon's name or description, the calculation will put a -5 penalty on the attack's To Hit and +10 on its Damage."]
 		}
 	},
 	"shield master" : {
 		name : "Shield Master",
 		source : ["P", 170],
 		description : "As a bonus action, when I use the Attack action, I can shove someone within 5 ft with my shield. I add my shield's AC bonus to Dex saves vs. effects targeting only me. As a reaction, if I succeed on a Dex save for half damage, I can interpose my shield to avoid the damage.",
-		eval : "AddAction(\"bonus action\", \"Shove with shield (on Attack action)\", \"the Shield Master feat\"); AddAction(\"reaction\", \"Interpose shield (if Dex save half dmg)\", \"the Shield Master feat\");",
-		removeeval : "RemoveAction(\"bonus action\", \"Shove with shield (on Attack action)\"); RemoveAction(\"reaction\", \"Interpose shield (if Dex save half dmg)\");"
+		eval : "AddAction(\"bonus action\", \"Shove with shield (with Attack action)\", \"the Shield Master feat\"); AddAction(\"reaction\", \"Interpose shield (if Dex save half dmg)\", \"the Shield Master feat\");",
+		removeeval : "RemoveAction(\"bonus action\", \"Shove with shield (with Attack action)\"); RemoveAction(\"reaction\", \"Interpose shield (if Dex save half dmg)\");"
 	},
 	"skilled" : {
 		name : "Skilled",
@@ -383,18 +394,19 @@ var FeatsList = {
 		source : ["P", 170],
 		description : "I can try to hide when I am lightly obscured. My position is not revealed when I am hidden from a creature and miss it with a ranged weapon attack. Dim light doesn't impose disadvantage on my Wisdom (Perception) checks relying on sight.",
 		prerequisite : "Dexterity 13 or higher",
-		eval : "AddString(\"Vision\", \"No disadv. on Perception in dim light to see\", \"; \");",
-		removeeval : "RemoveString(\"Vision\", \"No disadv. on Perception in dim light to see\");"
+		prereqeval : "What('Dex') >= 13",
+		vision : [["No disadv. on Perception in dim light", 0]]
 	},
 	"spell sniper [bard]" : {
 		name : "Spell Sniper [Bard]",
 		source : ["P", 170],
 		description : "Any spell that I cast that has a ranged attack roll has its range doubled and ignores half cover and three-quarters cover. I learn one bard cantrip that requires an attack roll. Charisma is my spellcasting ability for this.",
 		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'",
 		eval : "CurrentSpells[\"spell sniper bard\"] = {name : \"Spell Sniper [Bard]\", ability : 6, list : {class : \"bard\", attackOnly : \"true\"}, known : {cantrips : 1}}; SetStringifieds(\"spells\");",
 		removeeval : "delete CurrentSpells[\"spell sniper bard\"]; SetStringifieds(\"spells\");",
 		calcChanges : {
-			atkAdd : ["if (!spellSniper && !fields.To_Hit_Bonus.match(/dc/i) && ((theWea && theWea.type.match(/cantrip|spell/i)) || (inputText + fields.Description).match(/spell|cantrip/i)) && fields.Range.match(//^(?!.*melee)(?=.*\d+.?(f.{0,2}t|m)).*$/i)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);};);};", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
+			atkAdd : ["if (!spellSniper && !isDC && isSpell && (/^(?!.*melee).*\\d+ ?(f.{0,2}t|m).*$/i).test(fields.Range)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);});}; ", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
 		}
 	},
 	"spell sniper [cleric]" : {
@@ -402,10 +414,11 @@ var FeatsList = {
 		source : ["P", 170],
 		description : "Any spell that I cast that has a ranged attack roll has its range doubled and ignores half cover and three-quarters cover. I learn one cleric cantrip that requires an attack roll. Wisdom is my spellcasting ability for this.",
 		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'",
 		eval : "CurrentSpells[\"spell sniper cleric\"] = {name : \"Spell Sniper [Cleric]\", ability : 5, list : {class : \"cleric\", attackOnly : \"true\"}, known : {cantrips : 1}}; SetStringifieds(\"spells\");",
 		removeeval : "delete CurrentSpells[\"spell sniper cleric\"]; SetStringifieds(\"spells\");",
 		calcChanges : {
-			atkAdd : ["if (!spellSniper && !fields.To_Hit_Bonus.match(/dc/i) && ((theWea && theWea.type.match(/cantrip|spell/i)) || (inputText + fields.Description).match(/spell|cantrip/i)) && fields.Range.match(//^(?!.*melee)(?=.*\d+.?(f.{0,2}t|m)).*$/i)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);};);};", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
+			atkAdd : ["if (!spellSniper && !isDC && isSpell && (/^(?!.*melee).*\\d+ ?(f.{0,2}t|m).*$/i).test(fields.Range)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);});}; ", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
 		}
 	},
 	"spell sniper [druid]" : {
@@ -413,10 +426,11 @@ var FeatsList = {
 		source : ["P", 170],
 		description : "Any spell that I cast that has a ranged attack roll has its range doubled and ignores half cover and three-quarters cover. I learn one druid cantrip that requires an attack roll. Wisdom is my spellcasting ability for this.",
 		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'",
 		eval : "CurrentSpells[\"spell sniper druid\"] = {name : \"Spell Sniper [Druid]\", ability : 5, list : {class : \"druid\", attackOnly : \"true\"}, known : {cantrips : 1}}; SetStringifieds(\"spells\");",
 		removeeval : "delete CurrentSpells[\"spell sniper druid\"]; SetStringifieds(\"spells\");",
 		calcChanges : {
-			atkAdd : ["if (!spellSniper && !fields.To_Hit_Bonus.match(/dc/i) && ((theWea && theWea.type.match(/cantrip|spell/i)) || (inputText + fields.Description).match(/spell|cantrip/i)) && fields.Range.match(//^(?!.*melee)(?=.*\d+.?(f.{0,2}t|m)).*$/i)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);};);};", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
+			atkAdd : ["if (!spellSniper && !isDC && isSpell && (/^(?!.*melee).*\\d+ ?(f.{0,2}t|m).*$/i).test(fields.Range)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);});}; ", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
 		}
 	},
 	"spell sniper [sorcerer]" : {
@@ -424,10 +438,11 @@ var FeatsList = {
 		source : ["P", 170],
 		description : "Any spell that I cast that has a ranged attack roll has its range doubled and ignores half cover and three-quarters cover. I learn one sorcerer cantrip that requires an attack roll. Charisma is my spellcasting ability for this.",
 		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'",
 		eval : "CurrentSpells[\"spell sniper sorcerer\"] = {name : \"Spell Sniper [Sorcerer]\", ability : 6, list : {class : \"sorcerer\", attackOnly : \"true\"}, known : {cantrips : 1}}; SetStringifieds(\"spells\");",
 		removeeval : "delete CurrentSpells[\"spell sniper sorcerer\"]; SetStringifieds(\"spells\");",
 		calcChanges : {
-			atkAdd : ["if (!spellSniper && !fields.To_Hit_Bonus.match(/dc/i) && ((theWea && theWea.type.match(/cantrip|spell/i)) || (inputText + fields.Description).match(/spell|cantrip/i)) && fields.Range.match(//^(?!.*melee)(?=.*\d+.?(f.{0,2}t|m)).*$/i)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);};);};", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
+			atkAdd : ["if (!spellSniper && !isDC && isSpell && (/^(?!.*melee).*\\d+ ?(f.{0,2}t|m).*$/i).test(fields.Range)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);});}; ", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
 		}
 	},
 	"spell sniper [warlock]" : {
@@ -435,10 +450,11 @@ var FeatsList = {
 		source : ["P", 170],
 		description : "Any spell that I cast that has a ranged attack roll has its range doubled and ignores half cover and three-quarters cover. I learn one warlock cantrip that requires an attack roll. Charisma is my spellcasting ability for this.",
 		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'",
 		eval : "CurrentSpells[\"spell sniper warlock\"] = {name : \"Spell Sniper [Warlock]\", ability : 6, list : {class : \"warlock\", attackOnly : \"true\"}, known : {cantrips : 1}}; SetStringifieds(\"spells\");",
 		removeeval : "delete CurrentSpells[\"spell sniper warlock\"]; SetStringifieds(\"spells\");",
 		calcChanges : {
-			atkAdd : ["if (!spellSniper && !fields.To_Hit_Bonus.match(/dc/i) && ((theWea && theWea.type.match(/cantrip|spell/i)) || (inputText + fields.Description).match(/spell|cantrip/i)) && fields.Range.match(//^(?!.*melee)(?=.*\d+.?(f.{0,2}t|m)).*$/i)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);};);};", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
+			atkAdd : ["if (!spellSniper && !isDC && isSpell && (/^(?!.*melee).*\\d+ ?(f.{0,2}t|m).*$/i).test(fields.Range)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);});}; ", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
 		}
 	},
 	"spell sniper [wizard]" : {
@@ -446,30 +462,43 @@ var FeatsList = {
 		source : ["P", 170],
 		description : "Any spell that I cast that has a ranged attack roll has its range doubled and ignores half cover and three-quarters cover. I learn one wizard cantrip that requires an attack roll. Intelligence is my spellcasting ability for this.",
 		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'",
 		eval : "CurrentSpells[\"spell sniper wizard\"] = {name : \"Spell Sniper [Wizard]\", ability : 4, list : {class : \"wizard\", attackOnly : \"true\"}, known : {cantrips : 1}}; SetStringifieds(\"spells\");",
 		removeeval : "delete CurrentSpells[\"spell sniper wizard\"]; SetStringifieds(\"spells\");",
 		calcChanges : {
-			atkAdd : ["if (!spellSniper && !fields.To_Hit_Bonus.match(/dc/i) && ((theWea && theWea.type.match(/cantrip|spell/i)) || (inputText + fields.Description).match(/spell|cantrip/i)) && fields.Range.match(//^(?!.*melee)(?=.*\d+.?(f.{0,2}t|m)).*$/i)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);};);};", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
+			atkAdd : ["if (!spellSniper && !isDC && isSpell && (/^(?!.*melee).*\\d+ ?(f.{0,2}t|m).*$/i).test(fields.Range)) {var spellSniper = true; var rangeNmbr = fields.Range.match(/\\d+/); rangeNmbr.forEach(function(dR) {fields.Range = fields.Range.replace(dR, Number(dR) * 2);});}; ", "My spells and cantrips that require a ranged attack roll, have their range doubled."]
 		}
 	},
 	"svirfneblin magic" : {
 		name : "Svirfneblin Magic",
-		source : ["E", 7],
+		source : [["E", 7], ["S", 115]],
 		prerequisite : "Being a Svirfneblin (Deep Gnome)",
+		prereqeval : "CurrentRace.known === 'deep gnome'",
 		description : "I can cast Nondetection on myself at will, without a material component. I can also cast the spells Blindness/Deafness, Blur, and Disguise Self once each. I regain the ability to cast these spells when I finish a long rest. Intelligence is my spellcasting ability for these spells.",
-		eval : "CurrentSpells[\"svirfneblin magic\"] = {name:\"Svirfneblin Magic\",ability:4,bonus:{nondetection:{name:\"at will (self only)\",spells:[\"nondetection\"],selection:[\"nondetection\"],atwill:true},svirfneblin:{name:\"1x long rest (self only)\",spells:[\"blindness/deafness\",\"blur\",\"disguise self\"],selection:[\"blindness/deafness\",\"blur\",\"disguise self\"],oncelr:true,times:3}}}; SetStringifieds(\"spells\");",
-		removeeval : "delete CurrentSpells[\"svirfneblin magic\"]; SetStringifieds(\"spells\");",
+		spellcastingBonus : [{
+			name : "at will (self only)",
+			spellcastingAbility : 4,
+			spells : ["nondetection"],
+			selection : ["nondetection"],
+			atwill : true
+		}, {
+			name : "1x long rest (self only)",
+			spells : ["blindness/deafness", "blur", "disguise self"],
+			selection : ["blindness/deafness", "blur", "disguise self"],
+			oncelr : true,
+			times : 3
+		}]
 	},
 	"tavern brawler" : {
 		name : "Tavern Brawler",
 		source : ["P", 170],
 		description : "I am proficient with improvised weapons. My unarmed strike does 1d4 damage. When I hit a creature with an unarmed strike or improvised weapon on my turn, I can attempt to grapple the target as a bonus action. [+1 Strength or Constitution]",
 		improvements : "Tavern Brawler (feat): +1 Strength or Constitution;",
-		eval : "AddAction(\"bonus action\", \"Grapple (if hit with unarmed/improv.)\", \"the Tavern Brawler feat\");",
-		removeeval : "RemoveAction(\"bonus action\", \"Grapple (if hit with unarmed/improv.)\");",
-		weapons : [false, false, ["improvised weapon"]],
+		eval : "AddAction(\"bonus action\", \"Grapple (on hit with unarmed/improv.)\", \"the Tavern Brawler feat\");",
+		removeeval : "RemoveAction(\"bonus action\", \"Grapple (on hit with unarmed/improv.)\");",
+		weapons : [false, false, ["improvised weapons"]],
 		calcChanges : {
-			atkAdd : ["if (WeaponName.match(/improvised weapon/i)) {fields.Description += '; Can attempt to grapple after hitting'} else if (WeaponName.match(/unarmed strike/i) && fields.Damage_Die == 1) {fields.Damage_Die = '1d4'; fields.Description += 'Can attempt to grapple after hitting'};", "My unarmed strikes do 1d4 damage instead of 1;\n - I can attempt to start a grapple after hitting a creature with an unarmed strike or improvised weapon."]
+			atkAdd : ["if (isMeleeWeapon && ((/unarmed strike/i).test(WeaponName) || (/improvised/i).test(WeaponName) || (/improvised weapon/i).test(theWea.type))) {fields.Description += (fields.Description ? '; ' : '') + 'After hitting, can attempt to grapple as a bonus action'; fields.Proficiency = true; }; if ((/unarmed strike/i).test(WeaponName) && fields.Damage_Die == 1) {fields.Damage_Die = '1d4'; }; ", "My unarmed strikes do 1d4 damage instead of 1;\n - After hitting a creature with an unarmed strike or improvised weapon in melee, I can attempt to start a grapple as a bonus action."]
 		}
 	},
 	"tough" : {
@@ -477,21 +506,23 @@ var FeatsList = {
 		source : ["P", 170],
 		description : "My hit point maximum increases by an amount equal to twice my character level.",
 		calcChanges : {
-			hp : "extrahp += totalhd * 2; extrastring += \"\\n + \" + totalhd + \" \\u00D7 2 from the Tough feat (\" + totalhd * 2 + \")\";"
+			hp : "extrahp += totalhd * 2; extrastring += '\\n + ' + totalhd + ' \\u00D7 2 from the Tough feat (' + (totalhd * 2) + ')';"
 		}
 	},
 	"war caster" : {
 		name : "War Caster",
 		source : ["P", 170],
 		prerequisite : "The ability to cast at least one spell",
+		prereqeval : "CurrentSpells.toSource() !== '({})'",
 		description : "Advantage on Con saves to maintain concentration on spells when damaged. Perform somatic components even when holding weapons or shield in one or both hands. Cast spell of 1 action casting time that targets only one creature instead of an opportunity attack.",
-		eval : "AddAction(\"reaction\", \"Opportunity Spell\", \"the War Caster feat\"); AddString(\"Saving Throw advantages \/ disadvantages\", \"Adv. on Con (Concentration) saves when damaged\", \"; \");",
-		removeeval : "RemoveAction(\"reaction\", \"Opportunity Spell\"); RemoveString(\"Saving Throw advantages \/ disadvantages\", \"Adv. on Con (Concentration) saves when damaged\", false);"
+		action : ["reaction", " - Opportunity Spell"],
+		eval : "AddString(\"Saving Throw advantages \/ disadvantages\", \"Adv. on Con (Concentration) saves when damaged\", \"; \");",
+		removeeval : "RemoveString(\"Saving Throw advantages \/ disadvantages\", \"Adv. on Con (Concentration) saves when damaged\", false);"
 	},
 	"weapon master" : {
 		name : "Weapon Master",
 		source : ["P", 170],
 		description : "I gain proficiency with four simple or martial weapons of my choice.\n[+1 Strength or Dexterity]",
-		improvements : "Weapon Master (feat): +1 Strength or Dexterity;",
+		improvements : "Weapon Master (feat): +1 Strength or Dexterity;"
 	}
 };
